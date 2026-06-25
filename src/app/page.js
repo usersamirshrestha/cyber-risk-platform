@@ -231,7 +231,7 @@ export default function Home() {
           )}
         </div>
 
-        {/* Right Column: Score Realtime Engine Card */}
+        {/* Right Column: Score Realtimee Engine Card */}
         <div className="lg:col-span-1">
           <div className="sticky top-12 bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-6 shadow-xl text-center">
             <div>
