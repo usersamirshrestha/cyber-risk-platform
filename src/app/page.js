@@ -197,9 +197,14 @@ export default function Home() {
         <div className="text-xs font-mono text-gray-500">
           Operator ID: <span className="text-blue-400">{user.email}</span>
         </div>
-        <button onClick={handleLogout} className="text-xs px-3 py-1.5 bg-gray-900 hover:bg-gray-800 border border-gray-800 rounded-md text-gray-400 font-semibold transition">
-          Disconnect Session
-        </button>
+        <div className="flex gap-3">
+          <a href="/analytics" className="text-xs px-3 py-1.5 bg-blue-950 hover:bg-blue-900 border border-blue-900 rounded-md text-blue-400 font-semibold transition">
+            📊 View Platform Analytics
+          </a>
+          <button onClick={handleLogout} className="text-xs px-3 py-1.5 bg-gray-900 hover:bg-gray-800 border border-gray-800 rounded-md text-gray-400 font-semibold transition">
+            Disconnect Session
+          </button>
+        </div>
       </div>
 
       <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
