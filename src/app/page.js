@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from './utils/supabase';
+import MFASetup from './components/MFASetup';
 
 export default function Home() {
   const [user, setUser] = useState(null);
@@ -262,8 +263,13 @@ export default function Home() {
           )}
         </div>
 
-        {/* Right Sidebar: Rating + Dynamic Action Items Panel */}
+        {/* Right Sidebar: Security Controls & Rating Panel */}
         <div className="lg:col-span-1 space-y-6">
+          
+          {/* 1. Multi-Factor Authentication Control Card */}
+          <MFASetup />
+
+          {/* 2. Security Rating Gauge Card */}
           <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 text-center space-y-6 shadow-xl">
             <h2 className="text-lg font-bold">Security Rating</h2>
             <div className="py-4 flex items-center justify-center">
@@ -276,7 +282,7 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Remediation Engine UI Block */}
+          {/* 3. Active Mitigation Advisory Panel */}
           <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4 shadow-xl">
             <div>
               <h3 className="text-base font-bold text-white tracking-tight">Active Mitigation Advisory</h3>
@@ -316,8 +322,8 @@ export default function Home() {
               )}
             </div>
           </div>
+          
         </div>
-
       </div>
     </main>
   );
