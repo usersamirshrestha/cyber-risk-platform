@@ -393,7 +393,7 @@ export default function Home() {
             </div>
 
             <div className="lg:col-span-1 space-y-6">
-              <MFASetup />
+              
 
               {submitSuccess ? (
                 <>
