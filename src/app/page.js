@@ -9,8 +9,8 @@ export default function Home() {
   const [questions, setQuestions] = useState([]);
   const [answers, setAnswers] = useState({});
   const [companyName, setCompanyName] = useState('');
-  const [companyIndustry, setCompanyIndustry] = useState('Technology'); // New Industry state
-  const [workspaceInitialized, setWorkspaceInitialized] = useState(false); // New Onboarding view state
+  const [companyIndustry, setCompanyIndustry] = useState('Technology'); 
+  const [workspaceInitialized, setWorkspaceInitialized] = useState(false); 
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -47,11 +47,6 @@ export default function Home() {
     }
     initializeSession();
   }, []);
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    window.location.reload();
-  };
 
   const handleSelectAnswer = (questionId, value) => {
     setAnswers(prev => ({ ...prev, [questionId]: value }));
@@ -173,43 +168,123 @@ export default function Home() {
     );
   }
 
+  // High-Fidelity B2B Enterprise Compliance Landing Showcase
   if (!user) {
     return (
-      <main className="min-h-screen bg-gray-950 text-white flex flex-col items-center justify-center p-6">
-        <div className="text-center space-y-4 max-w-md">
-          <div className="text-red-500 text-4xl">🔒</div>
-          <h1 className="text-2xl font-bold tracking-tight">Access Prohibited</h1>
-          <p className="text-gray-400 text-sm leading-relaxed">
-            This workspace monitors encrypted enterprise security posture metrics. Please authenticate your operator token to mount the workspace dashboard.
-          </p>
-          <a href="/auth" className="inline-block mt-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg text-xs tracking-wider uppercase transition shadow-lg">
-            Authenticate Operator Login
-          </a>
-        </div>
+      <main className="min-h-[calc(100vh-80px)] bg-gray-950 text-white relative overflow-hidden">
+        
+        {/* Dynamic Vector Grids */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#1f2937_1px,transparent_1px),linear-gradient(to_bottom,#1f2937_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-20"></div>
+        <div className="absolute top-0 left-1/4 w-[600px] h-[400px] bg-gradient-to-b from-blue-600/10 to-indigo-600/0 rounded-full blur-[140px] pointer-events-none"></div>
+
+        {/* HERO SECTION */}
+        <section className="max-w-7xl mx-auto px-6 pt-28 pb-20 relative z-10 text-center space-y-8">
+          <div className="space-y-4 max-w-4xl mx-auto">
+            <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gray-900 border border-gray-800 text-[11px] font-mono text-blue-400 uppercase tracking-wider">
+              <span className="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+              The Operating System for Cyber Risk Management
+            </span>
+            <h1 className="text-5xl md:text-7xl font-black tracking-tight leading-[1.05] bg-gradient-to-b from-white via-gray-200 to-gray-500 bg-clip-text text-transparent">
+              Continuous Governance.<br />Instant Remediation.
+            </h1>
+            <p className="text-gray-400 text-sm md:text-xl max-w-2xl mx-auto leading-relaxed pt-2">
+              Ditch fragile legacy spreadsheets. Quantify infrastructure control alignment, enforce app-based multi-factor authentication loops, and map automated threat strategies seamlessly.
+            </p>
+          </div>
+
+          <div className="flex flex-col sm:flex-row justify-center items-center gap-4 max-w-md mx-auto pt-4">
+            <a href="/auth" className="w-full sm:w-auto px-8 py-3.5 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 font-bold rounded-xl text-xs tracking-wider uppercase transition shadow-lg shadow-blue-500/20 text-center">
+              Deploy Workspace Portal
+            </a>
+            <a href="#features" className="w-full sm:w-auto px-8 py-3.5 bg-gray-900 hover:bg-gray-800 border border-gray-800 font-bold rounded-xl text-xs tracking-wider uppercase transition text-gray-300 text-center">
+              View Architecture
+            </a>
+          </div>
+        </section>
+
+        {/* DYNAMIC INTERACTIVE PLATFORM PREVIEW */}
+        <section className="max-w-6xl mx-auto px-6 pb-28 relative z-10">
+          <div className="bg-gradient-to-b from-gray-800/50 to-gray-900/20 border border-gray-800/80 rounded-2xl p-6 shadow-2xl space-y-6">
+            
+            {/* Window Header */}
+            <div className="flex justify-between items-center border-b border-gray-800 pb-4">
+              <div className="flex items-center gap-2 font-mono text-xs text-gray-500">
+                <span className="w-2.5 h-2.5 rounded-full bg-red-500/60"></span>
+                <span className="w-2.5 h-2.5 rounded-full bg-yellow-500/60"></span>
+                <span className="w-2.5 h-2.5 rounded-full bg-green-500/60"></span>
+                <span className="ml-2">compliance_engine_core.io</span>
+              </div>
+              <div className="text-[10px] bg-emerald-950/60 border border-emerald-900/50 text-emerald-400 px-2 py-0.5 rounded font-mono uppercase tracking-wider animate-pulse">
+                ● SECURITY SHIELD LIVE
+              </div>
+            </div>
+
+            {/* Interactive Metrics Bar Mocks */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="bg-gray-950 p-5 rounded-xl border border-gray-900 space-y-2">
+                <p className="text-[10px] font-mono text-gray-500 uppercase tracking-wider">MFA Authorization Gate</p>
+                <p className="text-xl font-bold text-white">✓ Enforced (AAL2 Level)</p>
+              </div>
+              <div className="bg-gray-950 p-5 rounded-xl border border-gray-900 space-y-2">
+                <p className="text-[10px] font-mono text-gray-500 uppercase tracking-wider">Posture Score Index</p>
+                <div className="flex items-center justify-between">
+                  <p className="text-xl font-bold text-blue-400">88% Compliance</p>
+                  <div className="w-16 bg-gray-900 h-2 rounded-full overflow-hidden">
+                    <div className="bg-blue-500 h-full w-[88%]"></div>
+                  </div>
+                </div>
+              </div>
+              <div className="bg-gray-950 p-5 rounded-xl border border-gray-900 space-y-2">
+                <p className="text-[10px] font-mono text-gray-500 uppercase tracking-wider">Remediation Script Status</p>
+                <p className="text-xl font-bold text-emerald-400">0 Critical Vulnerabilities</p>
+              </div>
+            </div>
+
+            {/* Simulated Live Logs Terminal Block */}
+            <div className="bg-gray-950 rounded-xl p-5 border border-gray-900 font-mono text-xs space-y-2 text-gray-400">
+              <p className="text-gray-600">// Active Blueprint Strategy Tracking</p>
+              <p><span className="text-blue-400">DOMAIN:</span> IDENTITY & ACCESS CONTROL</p>
+              <p><span className="text-amber-400">WARNING:</span> Unenforced app-based multi-factor credentials discovered on test node endpoints.</p>
+              <p><span className="text-emerald-400">STRATEGY:</span> Deploy conditional access rules forcing mandatory cryptographically backed validation tokens.</p>
+            </div>
+
+          </div>
+        </section>
+
+        {/* FEATURE INFORMATION DECK */}
+        <section id="features" className="max-w-7xl mx-auto px-6 pb-32 grid grid-cols-1 md:grid-cols-3 gap-8 relative z-10">
+          <div className="p-6 bg-gray-900/30 border border-gray-850 rounded-xl space-y-3">
+            <span className="w-10 h-10 rounded-lg bg-blue-950/50 border border-blue-900/40 flex items-center justify-center text-blue-400 text-base">🛡️</span>
+            <h3 className="text-base font-bold">Hardened MFA Verification</h3>
+            <p className="text-xs text-gray-400 leading-relaxed">
+              Enforce time-based, app-driven authorization profiles. Protect configuration dashboards using automated sessions backed by secure challenge routines.
+            </p>
+          </div>
+          <div className="p-6 bg-gray-900/30 border border-gray-850 rounded-xl space-y-3">
+            <span className="w-10 h-10 rounded-lg bg-blue-950/50 border border-blue-900/40 flex items-center justify-center text-blue-400 text-base">📊</span>
+            <h3 className="text-base font-bold">Isolated Tenant Charting</h3>
+            <p className="text-xs text-gray-400 leading-relaxed">
+              Segregate enterprise timeline records cleanly using dynamic drop-down filters. Map chronological risk vectors independently across individual target entities.
+            </p>
+          </div>
+          <div className="p-6 bg-gray-900/30 border border-gray-850 rounded-xl space-y-3">
+            <span className="w-10 h-10 rounded-lg bg-blue-950/50 border border-blue-900/40 flex items-center justify-center text-blue-400 text-base">⚙️</span>
+            <h3 className="text-base font-bold">Remediation Data Pipelines</h3>
+            <p className="text-xs text-gray-400 leading-relaxed">
+              Instantly converts structural infrastructure design failures into distinct implementation guidelines, strategy roadmaps, and validation criteria.
+            </p>
+          </div>
+        </section>
+
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen bg-gray-950 text-white p-6 md:p-12">
-      <div className="max-w-7xl mx-auto flex justify-between items-center mb-8 border-b border-gray-800 pb-4">
-        <div className="text-xs font-mono text-gray-500">
-          Operator ID: <span className="text-blue-400">{user.email}</span>
-        </div>
-        <div className="flex gap-3">
-          <a href="/analytics" className="text-xs px-3 py-1.5 bg-blue-950 hover:bg-blue-900 border border-blue-900 rounded-md text-blue-400 font-semibold transition">
-            📊 View Platform Analytics
-          </a>
-          <button onClick={handleLogout} className="text-xs px-3 py-1.5 bg-gray-900 hover:bg-gray-800 border border-gray-800 rounded-md text-gray-400 font-semibold transition">
-            Disconnect Session
-          </button>
-        </div>
-      </div>
-
+    <main className="min-h-[calc(100vh-80px)] bg-gray-950 text-white p-6 md:p-12">
       <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-6">
           
-          {/* Dynamic Switch Condition for Business Owner Onboarding Initialization */}
           {!workspaceInitialized ? (
             <div className="bg-gray-900 border border-gray-800 p-8 rounded-xl space-y-6 shadow-md max-w-xl mx-auto mt-12">
               <div className="text-center">
@@ -314,7 +389,6 @@ export default function Home() {
           )}
         </div>
 
-        {/* Right Sidebar: Security Controls & Rating Panel */}
         <div className="lg:col-span-1 space-y-6">
           <MFASetup />
 
