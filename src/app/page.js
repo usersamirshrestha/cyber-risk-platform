@@ -9,6 +9,8 @@ export default function Home() {
   const [questions, setQuestions] = useState([]);
   const [answers, setAnswers] = useState({});
   const [companyName, setCompanyName] = useState('');
+  const [companyIndustry, setCompanyIndustry] = useState('Technology'); // New Industry state
+  const [workspaceInitialized, setWorkspaceInitialized] = useState(false); // New Onboarding view state
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -74,7 +76,6 @@ export default function Home() {
     return Math.round((earnedWeight / totalWeight) * 100);
   };
 
-  // Remediation Advisory Mapping Data Engine
   const generateRemediationAdvice = () => {
     const adviceList = [];
 
@@ -84,7 +85,6 @@ export default function Home() {
         let actionItem = '';
         let strategy = '';
         
-        // Dynamic mapping based on domain and key terms
         if (q.domain === 'IDENTITY & ACCESS') {
           actionItem = 'Enforce Hardware/App-Based MFA immediately across all cloud/SSH entry points.';
           strategy = 'Deploy a centralized IAM provider (e.g., Okta, Entra ID) and enforce conditional access policies requiring biometric or authenticator tokens.';
@@ -122,7 +122,6 @@ export default function Home() {
 
   const handleSubmitAudit = async (e) => {
     e.preventDefault();
-    if (!companyName.trim()) return alert('Please enter a company name.');
 
     const unanswered = questions.some(q => !answers[q.id]);
     if (unanswered) return alert('Please answer all assessment questions.');
@@ -133,7 +132,7 @@ export default function Home() {
         .from('companies')
         .insert([{ 
           name: companyName, 
-          industry: 'Technology', 
+          industry: companyIndustry, 
           size: 'Enterprise',
           user_id: user.id 
         }])
@@ -209,72 +208,116 @@ export default function Home() {
 
       <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-6">
-          <h1 className="text-3xl font-extrabold tracking-tight">Cyber Risk Evaluation</h1>
-
-          {submitSuccess ? (
-            <div className="bg-green-950/30 border border-green-500/40 p-8 rounded-2xl text-center space-y-4">
-              <h2 className="text-2xl font-bold text-green-400">Assessment Vaulted</h2>
-              <p className="text-gray-400 text-sm max-w-md mx-auto">
-                The posture profile for <span className="text-white font-semibold">{companyName}</span> has been securely processed. Review the live tracking diagnostics layout below or mount a new session.
-              </p>
-              <button onClick={() => { setSubmitSuccess(false); setCompanyName(''); }} className="mt-4 px-6 py-2 bg-gray-900 border border-gray-700 rounded-lg text-sm text-white hover:bg-gray-800 transition">
-                Conduct New Assessment
-              </button>
-            </div>
-          ) : (
-            <form onSubmit={handleSubmitAudit} className="space-y-6">
-              <div className="bg-gray-900 border border-gray-800 p-6 rounded-xl space-y-3 shadow-md">
-                <label className="block text-xs font-bold uppercase tracking-wider text-gray-400">Target Organization Name</label>
-                <input 
-                  type="text" required value={companyName} onChange={(e) => setCompanyName(e.target.value)}
-                  className="w-full bg-gray-950 border border-gray-800 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-blue-500 text-sm"
-                  placeholder="e.g., Enterprise Core Systems"
-                />
+          
+          {/* Dynamic Switch Condition for Business Owner Onboarding Initialization */}
+          {!workspaceInitialized ? (
+            <div className="bg-gray-900 border border-gray-800 p-8 rounded-xl space-y-6 shadow-md max-w-xl mx-auto mt-12">
+              <div className="text-center">
+                <span className="text-blue-500 font-mono text-xs uppercase tracking-widest">System Initialization</span>
+                <h2 className="text-xl font-bold mt-1 text-white">Register Workspace Profile</h2>
+                <p className="text-xs text-gray-400 mt-2">
+                  Before launching your security posture metrics diagnostics, please bind your direct organization metadata.
+                </p>
               </div>
 
               <div className="space-y-4">
-                {questions.map((q, idx) => (
-                  <div key={q.id} className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4 shadow-md">
-                    <div className="flex justify-between items-center">
-                      <span className="text-xs px-2 py-1 bg-blue-950 text-blue-400 rounded font-bold border border-blue-900/50">{q.domain}</span>
-                      <span className="text-xs font-mono text-gray-500">Control #{idx + 1}</span>
-                    </div>
-                    <p className="text-gray-200 text-sm font-medium leading-relaxed">{q.question_text}</p>
-                    <div className="grid grid-cols-3 gap-3">
-                      {['Yes', 'Partial', 'No'].map((option) => {
-                        const isSelected = answers[q.id] === option;
-                        return (
-                          <button
-                            key={option} type="button" onClick={() => handleSelectAnswer(q.id, option)}
-                            className={`py-2 px-3 text-sm font-semibold rounded-lg border transition ${
-                              isSelected 
-                                ? option === 'Yes' ? 'bg-green-950/40 border-green-500 text-green-400' :
-                                  option === 'Partial' ? 'bg-yellow-950/40 border-yellow-500 text-yellow-300' : 'bg-red-950/40 border-red-500 text-red-400'
-                                : 'bg-gray-950 border-gray-800 text-gray-400 hover:bg-gray-800/40'
-                            }`}
-                          >
-                            {option}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                ))}
+                <div className="space-y-1">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-400">Legal Business Name</label>
+                  <input 
+                    type="text" required value={companyName} onChange={(e) => setCompanyName(e.target.value)}
+                    className="w-full bg-gray-950 border border-gray-800 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-blue-500 text-sm"
+                    placeholder="e.g., Acme Innovations Ltd"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-400">Industry Vertical</label>
+                  <select 
+                    value={companyIndustry} onChange={(e) => setCompanyIndustry(e.target.value)}
+                    className="w-full bg-gray-950 border border-gray-800 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-blue-500 text-sm"
+                  >
+                    <option value="Technology">Technology & Cloud SaaS</option>
+                    <option value="Finance">Fintech & Banking Operations</option>
+                    <option value="Healthcare">Healthcare & Biotech Systems</option>
+                    <option value="E-commerce">Retail & E-commerce Logistics</option>
+                  </select>
+                </div>
               </div>
-              <button type="submit" disabled={isSubmitting} className="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-sm tracking-wider uppercase shadow-lg transition">
-                {isSubmitting ? 'Securing Submissions...' : 'Vault & Finalize Audit'}
+
+              <button 
+                type="button"
+                onClick={() => {
+                  if (!companyName.trim()) return alert('Please input a valid organization profile title.');
+                  setWorkspaceInitialized(true);
+                }}
+                className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs tracking-wider uppercase shadow-lg transition"
+              >
+                Initialize Secure Workspace
               </button>
-            </form>
+            </div>
+          ) : (
+            <>
+              <div className="flex flex-col space-y-1">
+                <h1 className="text-3xl font-extrabold tracking-tight">Cyber Risk Evaluation</h1>
+                <p className="text-xs text-gray-400 font-mono uppercase tracking-wider">
+                  Target Company: <span className="text-blue-400 font-bold">{companyName}</span> ({companyIndustry})
+                </p>
+              </div>
+
+              {submitSuccess ? (
+                <div className="bg-green-950/30 border border-green-500/40 p-8 rounded-2xl text-center space-y-4">
+                  <h2 className="text-2xl font-bold text-green-400">Assessment Vaulted</h2>
+                  <p className="text-gray-400 text-sm max-w-md mx-auto">
+                    The posture profile for <span className="text-white font-semibold">{companyName}</span> has been securely processed. Review the live tracking diagnostics layout below or mount a new session.
+                  </p>
+                  <button onClick={() => { setSubmitSuccess(false); setWorkspaceInitialized(false); setCompanyName(''); }} className="mt-4 px-6 py-2 bg-gray-900 border border-gray-700 rounded-lg text-sm text-white hover:bg-gray-800 transition">
+                    Conduct New Assessment
+                  </button>
+                </div>
+              ) : (
+                <form onSubmit={handleSubmitAudit} className="space-y-6">
+                  <div className="space-y-4">
+                    {questions.map((q, idx) => (
+                      <div key={q.id} className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4 shadow-md">
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs px-2 py-1 bg-blue-950 text-blue-400 rounded font-bold border border-blue-900/50">{q.domain}</span>
+                          <span className="text-xs font-mono text-gray-500">Control #{idx + 1}</span>
+                        </div>
+                        <p className="text-gray-200 text-sm font-medium leading-relaxed">{q.question_text}</p>
+                        <div className="grid grid-cols-3 gap-3">
+                          {['Yes', 'Partial', 'No'].map((option) => {
+                            const isSelected = answers[q.id] === option;
+                            return (
+                              <button
+                                key={option} type="button" onClick={() => handleSelectAnswer(q.id, option)}
+                                className={`py-2 px-3 text-sm font-semibold rounded-lg border transition ${
+                                  isSelected 
+                                    ? option === 'Yes' ? 'bg-green-950/40 border-green-500 text-green-400' :
+                                      option === 'Partial' ? 'bg-yellow-950/40 border-yellow-500 text-yellow-300' : 'bg-red-950/40 border-red-500 text-red-400'
+                                    : 'bg-gray-950 border-gray-800 text-gray-400 hover:bg-gray-800/40'
+                                }`}
+                              >
+                                {option}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <button type="submit" disabled={isSubmitting} className="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-sm tracking-wider uppercase shadow-lg transition">
+                    {isSubmitting ? 'Securing Submissions...' : 'Vault & Finalize Audit'}
+                  </button>
+                </form>
+              )}
+            </>
           )}
         </div>
 
         {/* Right Sidebar: Security Controls & Rating Panel */}
         <div className="lg:col-span-1 space-y-6">
-          
-          {/* 1. Multi-Factor Authentication Control Card */}
           <MFASetup />
 
-          {/* 2. Security Rating Gauge Card */}
           <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 text-center space-y-6 shadow-xl">
             <h2 className="text-lg font-bold">Security Rating</h2>
             <div className="py-4 flex items-center justify-center">
@@ -287,7 +330,6 @@ export default function Home() {
             </div>
           </div>
 
-          {/* 3. Active Mitigation Advisory Panel */}
           <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4 shadow-xl">
             <div>
               <h3 className="text-base font-bold text-white tracking-tight">Active Mitigation Advisory</h3>
