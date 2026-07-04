@@ -7,7 +7,9 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 export default function AnalyticsPage() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [auditHistory, setAuditHistory] = useState([]);
+  const [allCompanies, setAllCompanies] = useState([]); // Store list of unique companies
+  const [selectedCompanyId, setSelectedCompanyId] = useState('all'); // Track selected filter
+  const [filteredChartData, setFilteredChartData] = useState([]);
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -20,12 +22,13 @@ export default function AnalyticsPage() {
         }
         setUser(session.user);
 
-        // Fetch all companies and their corresponding audit response scores linked to this operator
+        // Fetch relational audit response scores linked to this operator
         const { data: companiesData, error: compErr } = await supabase
           .from('companies')
           .select(`
             id,
             name,
+            industry,
             created_at,
             audit_responses (
               answer,
@@ -39,8 +42,8 @@ export default function AnalyticsPage() {
 
         if (compErr) throw compErr;
 
-        // Process the relational data into direct mathematical scores for our graph
-        const formattedHistory = companiesData.map((company) => {
+        // Process the relational rows into independent data profiles
+        const processedCompanies = companiesData.map((company) => {
           let totalWeight = 0;
           let earnedWeight = 0;
 
@@ -54,21 +57,41 @@ export default function AnalyticsPage() {
           const finalScore = totalWeight > 0 ? Math.round((earnedWeight / totalWeight) * 100) : 0;
 
           return {
+            id: company.id,
+            rawDate: company.created_at,
             date: new Date(company.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }),
             companyName: company.name,
+            industry: company.industry,
             score: finalScore
           };
         });
 
-        setAuditHistory(formattedHistory);
+        setAllCompanies(processedCompanies);
+        
+        // Default view: show all scores initially
+        setFilteredChartData(processedCompanies);
+
       } catch (err) {
-        setError(err.message || 'Error executing analytics ingestion pipeline.');
+        setError(err.message || 'Error executing analytics data pipeline.');
       } finally {
         setLoading(false);
       }
     }
     fetchAnalyticsData();
   }, []);
+
+  // Whenever the dropdown selection changes, instantly re-filter the data vectors
+  useEffect(() => {
+    if (selectedCompanyId === 'all') {
+      setFilteredChartData(allCompanies);
+    } else {
+      const filtered = allCompanies.filter(c => c.companyName === selectedCompanyId);
+      setFilteredChartData(filtered);
+    }
+  }, [selectedCompanyId, allCompanies]);
+
+  // Extract unique company names for our dropdown list selection
+  const uniqueCompanyNames = Array.from(new Set(allCompanies.map(c => c.companyName)));
 
   if (loading) {
     return (
@@ -82,14 +105,30 @@ export default function AnalyticsPage() {
 
   return (
     <main className="min-h-screen bg-gray-950 text-white p-6 md:p-12 space-y-8">
-      <div className="max-w-7xl mx-auto flex justify-between items-center border-b border-gray-800 pb-4">
+      <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center border-b border-gray-800 pb-4 gap-4">
         <div>
           <h1 className="text-3xl font-extrabold tracking-tight">Security Analytics Workspace</h1>
           <p className="text-xs font-mono text-gray-500 mt-1">Operator Profile: {user?.email}</p>
         </div>
-        <a href="/" className="text-xs px-4 py-2 bg-gray-900 hover:bg-gray-800 border border-gray-800 rounded-md text-blue-400 font-semibold transition">
-          ← Return to Evaluation Terminal
-        </a>
+        
+        {/* Dynamic Target Selection Dropdown Control */}
+        <div className="flex items-center gap-3 w-full md:w-auto">
+          <label className="text-xs font-bold uppercase tracking-wider text-gray-400 font-mono whitespace-nowrap">Filter Scope:</label>
+          <select
+            value={selectedCompanyId}
+            onChange={(e) => setSelectedCompanyId(e.target.value)}
+            className="bg-gray-900 border border-gray-800 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500 min-w-[200px]"
+          >
+            <option value="all">All Organizations Combined</option>
+            {uniqueCompanyNames.map((name, index) => (
+              <option key={index} value={name}>{name}</option>
+            ))}
+          </select>
+          
+          <a href="/" className="text-xs px-4 py-2 bg-gray-900 hover:bg-gray-800 border border-gray-800 rounded-md text-blue-400 font-semibold transition whitespace-nowrap ml-2">
+            ← Return
+          </a>
+        </div>
       </div>
 
       <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -97,21 +136,23 @@ export default function AnalyticsPage() {
         {/* Graph Display Area */}
         <div className="lg:col-span-2 bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4 shadow-xl">
           <div>
-            <h2 className="text-lg font-bold">Chronological Posture Trend</h2>
-            <p className="text-xs text-gray-500 font-mono">Historical Cyber Risk Index Mapping</p>
+            <h2 className="text-lg font-bold">
+              {selectedCompanyId === 'all' ? 'Global Posture Trend' : `${selectedCompanyId} Posture Trend`}
+            </h2>
+            <p className="text-xs text-gray-500 font-mono">Isolated Cyber Risk Timeline Progression</p>
           </div>
 
-          {auditHistory.length < 2 ? (
+          {filteredChartData.length < 2 ? (
             <div className="h-[300px] flex items-center justify-center border border-dashed border-gray-800 rounded-xl text-gray-500 text-sm font-mono text-center px-4">
-              Insufficient timeline depth. Complete at least 2 target company audits to generate continuous vectors.
+              Insufficient data vectors for this selection. Complete multiple historical audits for {selectedCompanyId === 'all' ? 'organizations' : selectedCompanyId} to generate timeline trends.
             </div>
           ) : (
             <div className="h-[300px] w-full pt-4">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={auditHistory}>
+                <LineChart data={filteredChartData}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
-                  <XAxis dataKey="date" stroke="#64748b" fontSize={12} fontClassName="font-mono" />
-                  <YAxis domain={[0, 100]} stroke="#64748b" fontSize={12} fontClassName="font-mono" />
+                  <XAxis dataKey="date" stroke="#64748b" fontSize={12} />
+                  <YAxis domain={[0, 100]} stroke="#64748b" fontSize={12} />
                   <Tooltip 
                     contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '8px' }}
                     labelStyle={{ color: '#94a3b8', fontFamily: 'monospace' }}
@@ -131,23 +172,26 @@ export default function AnalyticsPage() {
           </div>
 
           <div className="space-y-3 max-h-[320px] overflow-y-auto pr-1">
-            {auditHistory.length === 0 ? (
+            {allCompanies.length === 0 ? (
               <div className="text-xs text-center text-gray-500 p-4 font-mono">No record metrics discovered.</div>
             ) : (
-              auditHistory.slice().reverse().map((audit, idx) => (
-                <div key={idx} className="bg-gray-950 border border-gray-800 p-3 rounded-lg flex justify-between items-center">
-                  <div>
-                    <p className="text-sm font-bold text-white tracking-tight">{audit.companyName}</p>
-                    <p className="text-[10px] font-mono text-gray-500 mt-0.5">{audit.date}</p>
+              allCompanies
+                .filter(c => selectedCompanyId === 'all' || c.companyName === selectedCompanyId)
+                .slice().reverse()
+                .map((audit, idx) => (
+                  <div key={idx} className="bg-gray-950 border border-gray-800 p-3 rounded-lg flex justify-between items-center">
+                    <div>
+                      <p className="text-sm font-bold text-white tracking-tight">{audit.companyName}</p>
+                      <p className="text-[10px] font-mono text-gray-500 mt-0.5">{audit.date} • <span className="text-blue-500">{audit.industry}</span></p>
+                    </div>
+                    <span className={`text-sm font-black px-2.5 py-1 rounded font-mono border ${
+                      audit.score >= 80 ? 'bg-green-950/40 text-green-400 border-green-900/40' :
+                      audit.score >= 50 ? 'bg-yellow-950/40 text-yellow-400 border-yellow-900/40' : 'bg-red-950/40 text-red-400 border-red-900/40'
+                    }`}>
+                      {audit.score}%
+                    </span>
                   </div>
-                  <span className={`text-sm font-black px-2.5 py-1 rounded font-mono border ${
-                    audit.score >= 80 ? 'bg-green-950/40 text-green-400 border-green-900/40' :
-                    audit.score >= 50 ? 'bg-yellow-950/40 text-yellow-400 border-yellow-900/40' : 'bg-red-950/40 text-red-400 border-red-900/40'
-                  }`}>
-                    {audit.score}%
-                  </span>
-                </div>
-              ))
+                ))
             )}
           </div>
         </div>
