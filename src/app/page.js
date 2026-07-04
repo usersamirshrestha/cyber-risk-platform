@@ -79,25 +79,33 @@ export default function Home() {
       if (answer === 'No' || answer === 'Partial') {
         let actionItem = '';
         let strategy = '';
+        let technicalContext = '';
         
+        // Advanced dynamic architecture mapping engine
         if (q.domain === 'IDENTITY & ACCESS') {
-          actionItem = 'Enforce Hardware/App-Based MFA immediately across all cloud/SSH entry points.';
-          strategy = 'Deploy a centralized IAM provider (e.g., Okta, Entra ID) and enforce conditional access policies requiring biometric or authenticator tokens.';
+          technicalContext = 'Unenforced or weak authentication methods leave administrative panels vulnerable to credential stuffing, brute-force algorithms, and session hijacking vectors.';
+          actionItem = 'Enforce Hardware/App-Based MFA immediately across all cloud dashboards, corporate email profiles, and SSH production entry points.';
+          strategy = 'Deploy a centralized Identity Provider (IDP) such as Okta or Microsoft Entra ID. Configure Conditional Access Policies that completely block authentication attempts unless validated by a biometric FIDO2 key or a TOTP authenticator token hook.';
         } else if (q.domain === 'NETWORK SECURITY' && q.question_text.includes('Firewall')) {
-          actionItem = 'Deploy Cloud-Native Web Application Firewalls (WAF) to front-face services.';
-          strategy = 'Route public domains through services like Cloudflare or AWS WAF to block SQL injection and Layer 7 malicious payloads before they hit servers.';
+          technicalContext = 'Directly exposing origin server IP addresses allows malicious actors to bypass standard network security controls, opening the door to massive Layer 7 HTTP flood attacks, SQL injections, and Cross-Site Scripting (XSS).';
+          actionItem = 'Deploy an Enterprise Cloud-Native Web Application Firewall (WAF) to front-face all public service records.';
+          strategy = 'Route your root public domains through a proxy network like Cloudflare Enterprise or AWS WAF. Configure rigid edge rules to analyze incoming HTTP packet structures, drop malicious payloads before they hit your compute instances, and obscure your real infrastructure IPs.';
         } else if (q.domain === 'NETWORK SECURITY') {
-          actionItem = 'Isolate core DB/Production clusters using granular Virtual Network Subnets.';
-          strategy = 'Implement zero-trust network architectures using VPC security groups to block structural connectivity between internal office computers and live production environments.';
+          technicalContext = 'A flat network topology means that if a single office workstation is compromised by malware, the attacker can freely move laterally across the internal network to access your live production databases.';
+          actionItem = 'Isolate core relational databases and production compute clusters into private network subnets.';
+          strategy = 'Re-architect your cloud environment using VPC (Virtual Private Cloud) structural isolation. Implement strict Virtual Firewalls / Security Groups that block all inbound connectivity to production servers except for specific, white-listed application gateway nodes using micro-segmentation principles.';
         } else if (q.domain === 'INCIDENT RESPONSE' && q.question_text.includes('Plan')) {
-          actionItem = 'Draft an executive Incident Response Plan (IRP) and simulate a tabletop exercise.';
-          strategy = 'Establish key containment roles, communication paths, and run business continuity drills simulating active backup recovery schedules.';
+          technicalContext = 'Without a formalized containment strategy, organizations experience massive delays during a security breach, resulting in higher data loss, severe operational downtime, and legal compliance penalties.';
+          actionItem = 'Draft an executive Incident Response Plan (IRP) and establish an operational chain-of-command matrix.';
+          strategy = 'Document explicit playbooks for distinct attack vectors (e.g., Ransomware, Data Breach). Assign strict personnel roles (Commander, Comms Lead, Legal Council) and schedule a bi-annual tabletop simulation exercise to pressure-test your disaster recovery recovery time objectives (RTO).';
         } else if (q.domain === 'INCIDENT RESPONSE') {
-          actionItem = 'Establish real-time audit metric pipeline ingestion using a managed SIEM solution.';
-          strategy = 'Aggregate all cloud provider access trails, server system logs, and firewall traffic streams into a continuous analytics workspace (e.g., Datadog, Splunk).';
+          technicalContext = 'Silent failures and unmonitored server access logs mean an adversary could live inside your corporate environment for months undetected, slowly exfiltrating sensitive business records.';
+          actionItem = 'Establish real-time audit trail and system log ingestion into a centralized, managed SIEM platform.';
+          strategy = 'Install telemetry agents (e.g., Datadog, AWS CloudTrail, Splunk) across all cloud provider backplanes, application servers, and gateway routers. Configure continuous correlation rules and anomaly detection alerts to flag unexpected root access modifications instantly via webhooks.';
         } else {
-          actionItem = 'Review standard framework control parameters to fortify this infrastructure gap.';
-          strategy = 'Audit system architecture documentation to ensure parameters align directly with essential compliance criteria.';
+          technicalContext = 'Non-alignment with established cybersecurity framework parameters increases the attack surface and exposes the organization to systemic control oversights.';
+          actionItem = 'Conduct an immediate gap analysis review against standard control frameworks to mitigate this specific infrastructure vulnerability.';
+          strategy = 'Review configuration matrices, update structural system architecture schematics, and ensure operational logs align directly with essential security baseline criteria.';
         }
 
         adviceList.push({
@@ -105,6 +113,7 @@ export default function Home() {
           domain: q.domain,
           control: q.question_text,
           severity: q.risk_weight >= 4 ? 'CRITICAL HIGH' : 'MEDIUM RISK',
+          technicalContext,
           actionItem,
           strategy,
           status: answer
@@ -417,26 +426,31 @@ export default function Home() {
                 </div>
               ) : (
                 remediationItems.map((item) => (
-                  <div key={item.id} className="p-4 bg-gray-950 border border-gray-800 rounded-lg space-y-2.5">
+                  <div key={item.id} className="p-5 bg-gray-950 border border-gray-850 rounded-xl space-y-3 shadow-md">
                     <div className="flex justify-between items-center">
-                      <span className="text-[9px] font-bold px-1.5 py-0.5 bg-gray-900 border border-gray-800 rounded text-gray-400 uppercase font-mono">
+                      <span className="text-[9px] font-bold px-2 py-0.5 bg-gray-900 border border-gray-800 rounded text-blue-400 uppercase font-mono">
                         {item.domain}
                       </span>
-                      <span className={`text-[9px] font-black tracking-wide uppercase px-1.5 py-0.5 rounded ${
-                        item.severity.includes('CRITICAL') ? 'bg-red-950 text-red-400 border border-red-900/40' : 'bg-yellow-950 text-yellow-400 border border-yellow-900/40'
+                      <span className={`text-[9px] font-black tracking-wide uppercase px-2 py-0.5 rounded ${
+                        item.severity.includes('CRITICAL') ? 'bg-red-950/60 text-red-400 border border-red-900/40' : 'bg-amber-950/60 text-amber-400 border border-amber-900/40'
                       }`}>
                         {item.severity}
                       </span>
                     </div>
                     
-                    <div>
-                      <p className="text-xs font-bold text-gray-200">Required Action:</p>
-                      <p className="text-xs text-gray-400 mt-0.5 leading-relaxed">{item.actionItem}</p>
+                    <div className="space-y-0.5">
+                      <p className="text-[10px] font-bold text-gray-500 font-mono uppercase">Vulnerability Context:</p>
+                      <p className="text-xs text-gray-400 leading-relaxed italic">"{item.technicalContext}"</p>
                     </div>
 
-                    <div className="pt-1.5 border-t border-gray-900">
-                      <p className="text-[10px] font-bold text-blue-400 font-mono uppercase">Implementation Strategy:</p>
-                      <p className="text-[11px] text-gray-500 mt-0.5 leading-relaxed font-medium">{item.strategy}</p>
+                    <div className="pt-2 border-t border-gray-900 space-y-0.5">
+                      <p className="text-[10px] font-bold text-red-400 font-mono uppercase">Required Action:</p>
+                      <p className="text-xs text-gray-200 font-medium leading-relaxed">{item.actionItem}</p>
+                    </div>
+
+                    <div className="pt-2 border-t border-gray-900 space-y-0.5">
+                      <p className="text-[10px] font-bold text-blue-400 font-mono uppercase">Implementation Blueprint Strategy:</p>
+                      <p className="text-[11px] text-gray-400 leading-relaxed font-medium">{item.strategy}</p>
                     </div>
                   </div>
                 ))
