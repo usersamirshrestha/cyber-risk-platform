@@ -81,7 +81,6 @@ export default function Home() {
         let strategy = '';
         let technicalContext = '';
         
-        // Advanced dynamic architecture mapping engine
         if (q.domain === 'IDENTITY & ACCESS') {
           technicalContext = 'Unenforced or weak authentication methods leave administrative panels vulnerable to credential stuffing, brute-force algorithms, and session hijacking vectors.';
           actionItem = 'Enforce Hardware/App-Based MFA immediately across all cloud dashboards, corporate email profiles, and SSH production entry points.';
@@ -177,16 +176,12 @@ export default function Home() {
     );
   }
 
-  // High-Fidelity B2B Enterprise Compliance Landing Showcase
   if (!user) {
     return (
       <main className="min-h-[calc(100vh-80px)] bg-gray-950 text-white relative overflow-hidden">
-        
-        {/* Dynamic Vector Grids */}
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#1f2937_1px,transparent_1px),linear-gradient(to_bottom,#1f2937_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-20"></div>
         <div className="absolute top-0 left-1/4 w-[600px] h-[400px] bg-gradient-to-b from-blue-600/10 to-indigo-600/0 rounded-full blur-[140px] pointer-events-none"></div>
 
-        {/* HERO SECTION */}
         <section className="max-w-7xl mx-auto px-6 pt-28 pb-20 relative z-10 text-center space-y-8">
           <div className="space-y-4 max-w-4xl mx-auto">
             <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gray-900 border border-gray-800 text-[11px] font-mono text-blue-400 uppercase tracking-wider">
@@ -211,11 +206,8 @@ export default function Home() {
           </div>
         </section>
 
-        {/* DYNAMIC INTERACTIVE PLATFORM PREVIEW */}
         <section className="max-w-6xl mx-auto px-6 pb-28 relative z-10">
           <div className="bg-gradient-to-b from-gray-800/50 to-gray-900/20 border border-gray-800/80 rounded-2xl p-6 shadow-2xl space-y-6">
-            
-            {/* Window Header */}
             <div className="flex justify-between items-center border-b border-gray-800 pb-4">
               <div className="flex items-center gap-2 font-mono text-xs text-gray-500">
                 <span className="w-2.5 h-2.5 rounded-full bg-red-500/60"></span>
@@ -228,7 +220,6 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Interactive Metrics Bar Mocks */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="bg-gray-950 p-5 rounded-xl border border-gray-900 space-y-2">
                 <p className="text-[10px] font-mono text-gray-500 uppercase tracking-wider">MFA Authorization Gate</p>
@@ -249,18 +240,15 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Simulated Live Logs Terminal Block */}
             <div className="bg-gray-950 rounded-xl p-5 border border-gray-900 font-mono text-xs space-y-2 text-gray-400">
               <p className="text-gray-600">// Active Blueprint Strategy Tracking</p>
               <p><span className="text-blue-400">DOMAIN:</span> IDENTITY & ACCESS CONTROL</p>
               <p><span className="text-amber-400">WARNING:</span> Unenforced app-based multi-factor credentials discovered on test node endpoints.</p>
               <p><span className="text-emerald-400">STRATEGY:</span> Deploy conditional access rules forcing mandatory cryptographically backed validation tokens.</p>
             </div>
-
           </div>
         </section>
 
-        {/* FEATURE INFORMATION DECK */}
         <section id="features" className="max-w-7xl mx-auto px-6 pb-32 grid grid-cols-1 md:grid-cols-3 gap-8 relative z-10">
           <div className="p-6 bg-gray-900/30 border border-gray-850 rounded-xl space-y-3">
             <span className="w-10 h-10 rounded-lg bg-blue-950/50 border border-blue-900/40 flex items-center justify-center text-blue-400 text-base">🛡️</span>
@@ -284,63 +272,63 @@ export default function Home() {
             </p>
           </div>
         </section>
-
       </main>
     );
   }
 
   return (
     <main className="min-h-[calc(100vh-80px)] bg-gray-950 text-white p-6 md:p-12">
-      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 space-y-6">
-          
-          {!workspaceInitialized ? (
-            <div className="bg-gray-900 border border-gray-800 p-8 rounded-xl space-y-6 shadow-md max-w-xl mx-auto mt-12">
-              <div className="text-center">
-                <span className="text-blue-500 font-mono text-xs uppercase tracking-widest">System Initialization</span>
-                <h2 className="text-xl font-bold mt-1 text-white">Register Workspace Profile</h2>
-                <p className="text-xs text-gray-400 mt-2">
-                  Before launching your security posture metrics diagnostics, please bind your direct organization metadata.
-                </p>
-              </div>
-
-              <div className="space-y-4">
-                <div className="space-y-1">
-                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-400">Legal Business Name</label>
-                  <input 
-                    type="text" required value={companyName} onChange={(e) => setCompanyName(e.target.value)}
-                    className="w-full bg-gray-950 border border-gray-800 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-blue-500 text-sm"
-                    placeholder="e.g., Acme Innovations Ltd"
-                  />
-                </div>
-
-                <div className="space-y-1">
-                  <label className="block text-xs font-bold uppercase tracking-wider text-gray-400">Industry Vertical</label>
-                  <select 
-                    value={companyIndustry} onChange={(e) => setCompanyIndustry(e.target.value)}
-                    className="w-full bg-gray-950 border border-gray-800 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-blue-500 text-sm"
-                  >
-                    <option value="Technology">Technology & Cloud SaaS</option>
-                    <option value="Finance">Fintech & Banking Operations</option>
-                    <option value="Healthcare">Healthcare & Biotech Systems</option>
-                    <option value="E-commerce">Retail & E-commerce Logistics</option>
-                  </select>
-                </div>
-              </div>
-
-              <button 
-                type="button"
-                onClick={() => {
-                  if (!companyName.trim()) return alert('Please input a valid organization profile title.');
-                  setWorkspaceInitialized(true);
-                }}
-                className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs tracking-wider uppercase shadow-lg transition"
-              >
-                Initialize Secure Workspace
-              </button>
+      <div className="max-w-7xl mx-auto">
+        
+        {!workspaceInitialized ? (
+          <div className="bg-gray-900 border border-gray-800 p-8 rounded-xl space-y-6 shadow-md max-w-xl mx-auto mt-12">
+            <div className="text-center">
+              <span className="text-blue-500 font-mono text-xs uppercase tracking-widest">System Initialization</span>
+              <h2 className="text-xl font-bold mt-1 text-white">Register Workspace Profile</h2>
+              <p className="text-xs text-gray-400 mt-2">
+                Before launching your security posture metrics diagnostics, please bind your direct organization metadata.
+              </p>
             </div>
-          ) : (
-            <>
+
+            <div className="space-y-4">
+              <div className="space-y-1">
+                <label className="block text-xs font-bold uppercase tracking-wider text-gray-400">Legal Business Name</label>
+                <input 
+                  type="text" required value={companyName} onChange={(e) => setCompanyName(e.target.value)}
+                  className="w-full bg-gray-950 border border-gray-800 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-blue-500 text-sm"
+                  placeholder="e.g., Acme Innovations Ltd"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="block text-xs font-bold uppercase tracking-wider text-gray-400">Industry Vertical</label>
+                <select 
+                  value={companyIndustry} onChange={(e) => setCompanyIndustry(e.target.value)}
+                  className="w-full bg-gray-950 border border-gray-800 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-blue-500 text-sm"
+                >
+                  <option value="Technology">Technology & Cloud SaaS</option>
+                  <option value="Finance">Fintech & Banking Operations</option>
+                  <option value="Healthcare">Healthcare & Biotech Systems</option>
+                  <option value="E-commerce">Retail & E-commerce Logistics</option>
+                </select>
+              </div>
+            </div>
+
+            <button 
+              type="button"
+              onClick={() => {
+                if (!companyName.trim()) return alert('Please input a valid organization profile title.');
+                setWorkspaceInitialized(true);
+              }}
+              className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs tracking-wider uppercase shadow-lg transition"
+            >
+              Initialize Secure Workspace
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            <div className="lg:col-span-2 space-y-6">
               <div className="flex flex-col space-y-1">
                 <h1 className="text-3xl font-extrabold tracking-tight">Cyber Risk Evaluation</h1>
                 <p className="text-xs text-gray-400 font-mono uppercase tracking-wider">
@@ -350,12 +338,20 @@ export default function Home() {
 
               {submitSuccess ? (
                 <div className="bg-green-950/30 border border-green-500/40 p-8 rounded-2xl text-center space-y-4">
-                  <h2 className="text-2xl font-bold text-green-400">Assessment Vaulted</h2>
+                  <h2 className="text-2xl font-bold text-green-400">Assessment Vaulted Securely</h2>
                   <p className="text-gray-400 text-sm max-w-md mx-auto">
-                    The posture profile for <span className="text-white font-semibold">{companyName}</span> has been securely processed. Review the live tracking diagnostics layout below or mount a new session.
+                    The posture profile data vectors for <span className="text-white font-semibold">{companyName}</span> have been fully processed and written to the immutable relational logging database.
                   </p>
-                  <button onClick={() => { setSubmitSuccess(false); setWorkspaceInitialized(false); setCompanyName(''); }} className="mt-4 px-6 py-2 bg-gray-900 border border-gray-700 rounded-lg text-sm text-white hover:bg-gray-800 transition">
-                    Conduct New Assessment
+                  <button 
+                    onClick={() => { 
+                      setSubmitSuccess(false); 
+                      setWorkspaceInitialized(false); 
+                      setCompanyName(''); 
+                      setAnswers({}); 
+                    }} 
+                    className="mt-4 px-6 py-2 bg-gray-900 border border-gray-700 rounded-lg text-sm text-white hover:bg-gray-800 transition"
+                  >
+                    Conduct New Audit Session
                   </button>
                 </div>
               ) : (
@@ -394,71 +390,79 @@ export default function Home() {
                   </button>
                 </form>
               )}
-            </>
-          )}
-        </div>
-
-        <div className="lg:col-span-1 space-y-6">
-          <MFASetup />
-
-          <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 text-center space-y-6 shadow-xl">
-            <h2 className="text-lg font-bold">Security Rating</h2>
-            <div className="py-4 flex items-center justify-center">
-              <div className="w-36 h-36 rounded-full border-4 border-gray-800 flex flex-col items-center justify-center bg-gray-950">
-                <span className={`text-4xl font-black ${currentScore === null ? 'text-gray-600' : currentScore >= 80 ? 'text-green-400' : currentScore >= 50 ? 'text-yellow-400' : 'text-red-500'}`}>
-                  {currentScore !== null ? `${currentScore}%` : '--'}
-                </span>
-                <span className="text-[9px] uppercase font-bold text-gray-500 tracking-widest mt-1">Score Index</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4 shadow-xl">
-            <div>
-              <h3 className="text-base font-bold text-white tracking-tight">Active Mitigation Advisory</h3>
-              <p className="text-[10px] text-gray-500 font-mono uppercase mt-0.5">Automated Threat Mitigation Blueprint</p>
             </div>
 
-            <div className="space-y-4 max-h-[500px] overflow-y-auto pr-1">
-              {remediationItems.length === 0 ? (
-                <div className="p-4 bg-green-950/20 border border-green-800/30 text-green-400 rounded-lg text-xs font-medium text-center">
-                  ✓ Ideal Alignment: All control profiles meet absolute framework expectations. No vulnerability advisories generated.
-                </div>
-              ) : (
-                remediationItems.map((item) => (
-                  <div key={item.id} className="p-5 bg-gray-950 border border-gray-850 rounded-xl space-y-3 shadow-md">
-                    <div className="flex justify-between items-center">
-                      <span className="text-[9px] font-bold px-2 py-0.5 bg-gray-900 border border-gray-800 rounded text-blue-400 uppercase font-mono">
-                        {item.domain}
-                      </span>
-                      <span className={`text-[9px] font-black tracking-wide uppercase px-2 py-0.5 rounded ${
-                        item.severity.includes('CRITICAL') ? 'bg-red-950/60 text-red-400 border border-red-900/40' : 'bg-amber-950/60 text-amber-400 border border-amber-900/40'
-                      }`}>
-                        {item.severity}
-                      </span>
-                    </div>
-                    
-                    <div className="space-y-0.5">
-                      <p className="text-[10px] font-bold text-gray-500 font-mono uppercase">Vulnerability Context:</p>
-                      <p className="text-xs text-gray-400 leading-relaxed italic">"{item.technicalContext}"</p>
-                    </div>
+            <div className="lg:col-span-1 space-y-6">
+              <MFASetup />
 
-                    <div className="pt-2 border-t border-gray-900 space-y-0.5">
-                      <p className="text-[10px] font-bold text-red-400 font-mono uppercase">Required Action:</p>
-                      <p className="text-xs text-gray-200 font-medium leading-relaxed">{item.actionItem}</p>
-                    </div>
-
-                    <div className="pt-2 border-t border-gray-900 space-y-0.5">
-                      <p className="text-[10px] font-bold text-blue-400 font-mono uppercase">Implementation Blueprint Strategy:</p>
-                      <p className="text-[11px] text-gray-400 leading-relaxed font-medium">{item.strategy}</p>
+              {submitSuccess ? (
+                <>
+                  <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 text-center space-y-6 shadow-xl animate-fade-in">
+                    <h2 className="text-lg font-bold text-white">Generated Security Rating</h2>
+                    <div className="py-4 flex items-center justify-center">
+                      <div className="w-36 h-36 rounded-full border-4 border-gray-800 flex flex-col items-center justify-center bg-gray-950">
+                        <span className={`text-4xl font-black ${currentScore === null ? 'text-gray-600' : currentScore >= 80 ? 'text-green-400' : currentScore >= 50 ? 'text-yellow-400' : 'text-red-500'}`}>
+                          {currentScore !== null ? `${currentScore}%` : '--'}
+                        </span>
+                        <span className="text-[9px] uppercase font-bold text-gray-500 tracking-widest mt-1">Score Index</span>
+                      </div>
                     </div>
                   </div>
-                ))
+
+                  <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4 shadow-xl animate-fade-in">
+                    <div>
+                      <h3 className="text-base font-bold text-white tracking-tight">Active Mitigation Advisory</h3>
+                      <p className="text-[10px] text-gray-500 font-mono uppercase mt-0.5">Automated Threat Mitigation Blueprint</p>
+                    </div>
+
+                    <div className="space-y-4 max-h-[500px] overflow-y-auto pr-1">
+                      {remediationItems.length === 0 ? (
+                        <div className="p-4 bg-green-950/20 border border-green-800/30 text-green-400 rounded-lg text-xs font-medium text-center">
+                          ✓ Ideal Alignment: All control profiles meet absolute framework expectations. No vulnerability advisories generated.
+                        </div>
+                      ) : (
+                        remediationItems.map((item) => (
+                          <div key={item.id} className="p-5 bg-gray-950 border border-gray-850 rounded-xl space-y-3 shadow-md">
+                            <div className="flex justify-between items-center">
+                              <span className="text-[9px] font-bold px-2 py-0.5 bg-gray-900 border border-gray-800 rounded text-blue-400 uppercase font-mono">
+                                {item.domain}
+                              </span>
+                              <span className={`text-[9px] font-black tracking-wide uppercase px-2 py-0.5 rounded ${
+                                item.severity.includes('CRITICAL') ? 'bg-red-950/60 text-red-400 border border-red-900/40' : 'bg-amber-950/60 text-amber-400 border border-amber-900/40'
+                              }`}>
+                                {item.severity}
+                              </span>
+                            </div>
+                            
+                            <div className="space-y-0.5">
+                              <p className="text-[10px] font-bold text-gray-500 font-mono uppercase">Vulnerability Context:</p>
+                              <p className="text-xs text-gray-400 leading-relaxed italic">"{item.technicalContext}"</p>
+                            </div>
+
+                            <div className="pt-2 border-t border-gray-900 space-y-0.5">
+                              <p className="text-[10px] font-bold text-red-400 font-mono uppercase">Required Action:</p>
+                              <p className="text-xs text-gray-200 font-medium leading-relaxed">{item.actionItem}</p>
+                            </div>
+
+                            <div className="pt-2 border-t border-gray-900 space-y-0.5">
+                              <p className="text-[10px] font-bold text-blue-400 font-mono uppercase">Implementation Blueprint Strategy:</p>
+                              <p className="text-[11px] text-gray-400 leading-relaxed font-medium">{item.strategy}</p>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <div className="bg-gray-900/40 border border-gray-850 border-dashed rounded-xl p-8 text-center text-gray-500 text-xs font-mono py-20">
+                  🔒 Posture analysis metrics locked. Complete the framework controls evaluation and vault the results to compile your mitigation advisory assets.
+                </div>
               )}
             </div>
+
           </div>
-          
-        </div>
+        )}
       </div>
     </main>
   );
