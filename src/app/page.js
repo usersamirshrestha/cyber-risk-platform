@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from './utils/supabase';
-import MFASetup from './components/MFASetup';
+// Import Lucide Icons for high-fidelity enterprise styling
+import { ShieldAlert, CheckCircle2, Lock, Building2, Activity, FileText, Check } from 'lucide-react';
 
 export default function Home() {
   const [user, setUser] = useState(null);
@@ -182,6 +183,7 @@ export default function Home() {
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#1f2937_1px,transparent_1px),linear-gradient(to_bottom,#1f2937_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-20"></div>
         <div className="absolute top-0 left-1/4 w-[600px] h-[400px] bg-gradient-to-b from-blue-600/10 to-indigo-600/0 rounded-full blur-[140px] pointer-events-none"></div>
 
+        {/* HERO SECTION */}
         <section className="max-w-7xl mx-auto px-6 pt-28 pb-20 relative z-10 text-center space-y-8">
           <div className="space-y-4 max-w-4xl mx-auto">
             <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gray-900 border border-gray-800 text-[11px] font-mono text-blue-400 uppercase tracking-wider">
@@ -206,6 +208,7 @@ export default function Home() {
           </div>
         </section>
 
+        {/* MOCK PLATFORM PREVIEW */}
         <section className="max-w-6xl mx-auto px-6 pb-28 relative z-10">
           <div className="bg-gradient-to-b from-gray-800/50 to-gray-900/20 border border-gray-800/80 rounded-2xl p-6 shadow-2xl space-y-6">
             <div className="flex justify-between items-center border-b border-gray-800 pb-4">
@@ -215,15 +218,18 @@ export default function Home() {
                 <span className="w-2.5 h-2.5 rounded-full bg-green-500/60"></span>
                 <span className="ml-2">compliance_engine_core.io</span>
               </div>
-              <div className="text-[10px] bg-emerald-950/60 border border-emerald-900/50 text-emerald-400 px-2 py-0.5 rounded font-mono uppercase tracking-wider animate-pulse">
-                ● SECURITY SHIELD LIVE
+              <div className="text-[10px] bg-emerald-950/60 border border-emerald-900/50 text-emerald-400 px-2 py-0.5 rounded font-mono uppercase tracking-wider animate-pulse flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                SECURITY SHIELD LIVE
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="bg-gray-950 p-5 rounded-xl border border-gray-900 space-y-2">
                 <p className="text-[10px] font-mono text-gray-500 uppercase tracking-wider">MFA Authorization Gate</p>
-                <p className="text-xl font-bold text-white">✓ Enforced (AAL2 Level)</p>
+                <p className="text-xl font-bold text-white flex items-center gap-2">
+                  <Check className="w-5 h-5 text-emerald-400 stroke-[2.5]" /> Enforced (AAL2 Level)
+                </p>
               </div>
               <div className="bg-gray-950 p-5 rounded-xl border border-gray-900 space-y-2">
                 <p className="text-[10px] font-mono text-gray-500 uppercase tracking-wider">Posture Score Index</p>
@@ -249,23 +255,30 @@ export default function Home() {
           </div>
         </section>
 
-        <section id="features" className="max-w-7xl mx-auto px-6 pb-32 grid grid-cols-1 md:grid-cols-3 gap-8 relative z-10">
+        {/* FEATURE INFORMATION DECK */}
+        <section id="features" className="max-w-7xl mx-auto px-6 pb-32 grid grid-cols-1 md:grid-cols-3 gap-8 relative z-10 scroll-mt-24">
           <div className="p-6 bg-gray-900/30 border border-gray-850 rounded-xl space-y-3">
-            <span className="w-10 h-10 rounded-lg bg-blue-950/50 border border-blue-900/40 flex items-center justify-center text-blue-400 text-base">🛡️</span>
+            <span className="w-10 h-10 rounded-lg bg-blue-950/50 border border-blue-900/40 flex items-center justify-center text-blue-400">
+              <Lock className="w-5 h-5 stroke-[2]" />
+            </span>
             <h3 className="text-base font-bold">Hardened MFA Verification</h3>
             <p className="text-xs text-gray-400 leading-relaxed">
               Enforce time-based, app-driven authorization profiles. Protect configuration dashboards using automated sessions backed by secure challenge routines.
             </p>
           </div>
           <div className="p-6 bg-gray-900/30 border border-gray-850 rounded-xl space-y-3">
-            <span className="w-10 h-10 rounded-lg bg-blue-950/50 border border-blue-900/40 flex items-center justify-center text-blue-400 text-base">📊</span>
+            <span className="w-10 h-10 rounded-lg bg-blue-950/50 border border-blue-900/40 flex items-center justify-center text-blue-400">
+              <Activity className="w-5 h-5 stroke-[2]" />
+            </span>
             <h3 className="text-base font-bold">Isolated Tenant Charting</h3>
             <p className="text-xs text-gray-400 leading-relaxed">
               Segregate enterprise timeline records cleanly using dynamic drop-down filters. Map chronological risk vectors independently across individual target entities.
             </p>
           </div>
           <div className="p-6 bg-gray-900/30 border border-gray-850 rounded-xl space-y-3">
-            <span className="w-10 h-10 rounded-lg bg-blue-950/50 border border-blue-900/40 flex items-center justify-center text-blue-400 text-base">⚙️</span>
+            <span className="w-10 h-10 rounded-lg bg-blue-950/50 border border-blue-900/40 flex items-center justify-center text-blue-400">
+              <FileText className="w-5 h-5 stroke-[2]" />
+            </span>
             <h3 className="text-base font-bold">Remediation Data Pipelines</h3>
             <p className="text-xs text-gray-400 leading-relaxed">
               Instantly converts structural infrastructure design failures into distinct implementation guidelines, strategy roadmaps, and validation criteria.
@@ -283,7 +296,9 @@ export default function Home() {
         {!workspaceInitialized ? (
           <div className="bg-gray-900 border border-gray-800 p-8 rounded-xl space-y-6 shadow-md max-w-xl mx-auto mt-12">
             <div className="text-center">
-              <span className="text-blue-500 font-mono text-xs uppercase tracking-widest">System Initialization</span>
+              <span className="text-blue-500 font-mono text-xs uppercase tracking-widest flex items-center justify-center gap-1.5">
+                <Building2 className="w-3.5 h-3.5" /> System Initialization
+              </span>
               <h2 className="text-xl font-bold mt-1 text-white">Register Workspace Profile</h2>
               <p className="text-xs text-gray-400 mt-2">
                 Before launching your security posture metrics diagnostics, please bind your direct organization metadata.
@@ -338,6 +353,9 @@ export default function Home() {
 
               {submitSuccess ? (
                 <div className="bg-green-950/30 border border-green-500/40 p-8 rounded-2xl text-center space-y-4">
+                  <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-green-900/50 text-green-400 mb-2">
+                    <CheckCircle2 className="w-6 h-6 stroke-[2.5]" />
+                  </div>
                   <h2 className="text-2xl font-bold text-green-400">Assessment Vaulted Securely</h2>
                   <p className="text-gray-400 text-sm max-w-md mx-auto">
                     The posture profile data vectors for <span className="text-white font-semibold">{companyName}</span> have been fully processed and written to the immutable relational logging database.
@@ -393,8 +411,6 @@ export default function Home() {
             </div>
 
             <div className="lg:col-span-1 space-y-6">
-              
-
               {submitSuccess ? (
                 <>
                   <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 text-center space-y-6 shadow-xl animate-fade-in">
@@ -417,8 +433,8 @@ export default function Home() {
 
                     <div className="space-y-4 max-h-[500px] overflow-y-auto pr-1">
                       {remediationItems.length === 0 ? (
-                        <div className="p-4 bg-green-950/20 border border-green-800/30 text-green-400 rounded-lg text-xs font-medium text-center">
-                          ✓ Ideal Alignment: All control profiles meet absolute framework expectations. No vulnerability advisories generated.
+                        <div className="p-4 bg-green-950/20 border border-green-800/30 text-green-400 rounded-lg text-xs font-medium text-center flex items-center justify-center gap-2">
+                          <CheckCircle2 className="w-4 h-4 text-green-400" /> Ideal Alignment: All control profiles meet absolute framework expectations. No vulnerability advisories generated.
                         </div>
                       ) : (
                         remediationItems.map((item) => (
@@ -455,8 +471,9 @@ export default function Home() {
                   </div>
                 </>
               ) : (
-                <div className="bg-gray-900/40 border border-gray-850 border-dashed rounded-xl p-8 text-center text-gray-500 text-xs font-mono py-20">
-                  🔒 Posture analysis metrics locked. Complete the framework controls evaluation and vault the results to compile your mitigation advisory assets.
+                <div className="bg-gray-900/40 border border-gray-850 border-dashed rounded-xl p-8 text-center text-gray-500 text-xs font-mono py-20 flex flex-col items-center justify-center gap-3">
+                  <Lock className="w-6 h-6 text-gray-600 stroke-[1.5]" />
+                  <span>Posture analysis metrics locked. Complete the framework controls evaluation and vault the results to compile your mitigation advisory assets.</span>
                 </div>
               )}
             </div>
