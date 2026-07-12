@@ -3,22 +3,53 @@
 import { useState, useEffect } from 'react';
 import { supabase } from './utils/supabase';
 // Import Lucide Icons for high-fidelity enterprise styling
-import { ShieldAlert, CheckCircle2, Lock, Building2, Activity, FileText, Check } from 'lucide-react';
+import { 
+  ShieldAlert, 
+  CheckCircle2, 
+  Lock, 
+  Building2, 
+  Activity, 
+  FileText, 
+  Check,
+  HelpCircle,
+  BookOpen,
+  ArrowLeft,
+  ArrowRight,
+  Layers
+} from 'lucide-react';
 
 export default function Home() {
   const [user, setUser] = useState(null);
-  const [questions, setQuestions] = useState([]);
-  const [answers, setAnswers] = useState({});
-  const [companyName, setCompanyName] = useState('');
-  const [companyIndustry, setCompanyIndustry] = useState('Technology'); 
-  const [workspaceInitialized, setWorkspaceInitialized] = useState(false); 
-  const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
+  
+  // --- CORE SYSTEM QUESTIONS (SUPABASE LIVE STATE) ---
+  const [allQuestions, setAllQuestions] = useState([]);
+  const [answers, setAnswers] = useState({});
+  const [currentDomain, setCurrentDomain] = useState('Identity & Access');
+  const [currentIndex, setCurrentIndex] = useState(0);
+  
+  // --- CONDITIONAL ADAPTIVE ROUTING STATE ---
+  const [inConditionalBranch, setInConditionalBranch] = useState(false);
+  const [companyName, setCompanyName] = useState('');
+  const [companyIndustry, setCompanyIndustry] = useState('Technology');
+  const [workspaceInitialized, setWorkspaceInitialized] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
 
+  // Hardcoded fallback deep dives mapping directly to framework rules
+  const educationalHooks = {
+    MFA_CONTROL: {
+      text: "Since multi-factor configurations are unverified or partial, are you at least enforcing administrative IP whitelisting or secure context access loops?",
+      hook: "💡 Technical Insight: Perimeter access should layer controls. If cryptographic tokens aren't ready, access parameters must restrict physical ingress zones to mitigate unauthorized credential usage."
+    },
+    FIREWALL_CONTROL: {
+      text: "Given perimeter vulnerabilities, do your origin network nodes block direct public ingress traffic completely?",
+      hook: "💡 Technical Insight: Attackers systematically scrape open network protocols. Obscuring infrastructure origin records stops automated Layer 7 HTTP exploits from reaching resource roots."
+    }
+  };
+
   useEffect(() => {
-    async function initializeSession() {
+    async function initializeSecureSession() {
       try {
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) {
@@ -27,156 +58,217 @@ export default function Home() {
         }
         setUser(session.user);
 
-        const { data: frameworkData, error: frameworkErr } = await supabase
+        // Fetch dynamic baseline parameters from production schema with relation hooks
+        const { data: frameworkRows, error: fetchErr } = await supabase
           .from('risk_framework')
-          .select('*')
+          .select(`
+            id,
+            domain,
+            question_text,
+            risk_weight,
+            remediation_vault (
+              technical_context,
+              action_item,
+              strategy_blueprint
+            )
+          `)
           .order('created_at', { ascending: true });
 
-        if (frameworkErr) throw frameworkErr;
-        setQuestions(frameworkData);
-        
-        const initialAnswers = {};
-        frameworkData.forEach(q => {
-          initialAnswers[q.id] = '';
-        });
-        setAnswers(initialAnswers);
+        if (fetchErr) throw fetchErr;
+        setAllQuestions(frameworkRows);
+
+        const initialMap = {};
+        frameworkRows.forEach(q => { initialMap[q.id] = ''; });
+        setAnswers(initialMap);
       } catch (err) {
-        setError(err.message || 'Unknown configuration pipeline error');
+        console.error('Core hydration execution failure:', err);
       } finally {
         setLoading(false);
       }
     }
-    initializeSession();
+    initializeSecureSession();
   }, []);
 
-  const handleSelectAnswer = (questionId, value) => {
-    setAnswers(prev => ({ ...prev, [questionId]: value }));
+  const filteredQuestions = allQuestions.filter(
+    q => q.domain?.toUpperCase() === currentDomain?.toUpperCase()
+  );
+  const activeQuestion = filteredQuestions[currentIndex];
+
+  // ORDERED DOMAIN ARRAY FOR AUTO-ADVANCING TABS
+  const domainSequence = ['Identity & Access', 'Network Security', 'Incident Response'];
+
+  const handleProcessAnswer = (chosenOption) => {
+    if (!activeQuestion) return;
+
+    setAnswers(prev => ({ ...prev, [activeQuestion.id]: chosenOption }));
+
+    const hookKey = (activeQuestion?.risk_weight >= 4) ? 'MFA_CONTROL' : 'FIREWALL_CONTROL';
+    const currentBranchHook = educationalHooks[hookKey];
+
+    if ((chosenOption === 'No' || chosenOption === 'Partial') && activeQuestion.remediation_vault && !inConditionalBranch) {
+      setInConditionalBranch(true);
+    } else {
+      setInConditionalBranch(false);
+      
+      // If there are more questions in this domain, step forward
+      if (currentIndex < filteredQuestions.length - 1) {
+        setCurrentIndex(prev => prev + 1);
+      } else {
+        // AUTOMATIC TAB JUMPING LOGIC
+        const nextDomainIndex = domainSequence.indexOf(currentDomain) + 1;
+        if (nextDomainIndex < domainSequence.length) {
+          setCurrentDomain(domainSequence[nextDomainIndex]);
+          setCurrentIndex(0);
+        } else {
+          // End of all questions across all domains reached
+          alert("All evaluation domains fully compiled! Ready to vault database tokens.");
+        }
+      }
+    }
   };
 
-  const calculateScore = () => {
+  const calculateDynamicScore = () => {
     let totalWeight = 0;
     let earnedWeight = 0;
-    let answeredCount = 0;
+    let counted = 0;
 
-    questions.forEach(q => {
-      const answer = answers[q.id];
-      if (answer) {
-        answeredCount++;
+    allQuestions.forEach(q => {
+      const selection = answers[q.id];
+      if (selection) {
+        counted++;
         totalWeight += q.risk_weight;
-        if (answer === 'Yes') earnedWeight += q.risk_weight;
-        else if (answer === 'Partial') earnedWeight += (q.risk_weight * 0.5);
+        if (selection === 'Yes') earnedWeight += q.risk_weight;
+        else if (selection === 'Partial') earnedWeight += (q.risk_weight * 0.5);
       }
     });
 
-    if (answeredCount === 0) return null;
+    if (counted === 0) return null;
     return Math.round((earnedWeight / totalWeight) * 100);
   };
 
   const generateRemediationAdvice = () => {
     const adviceList = [];
-
-    questions.forEach(q => {
+    allQuestions.forEach(q => {
       const answer = answers[q.id];
       if (answer === 'No' || answer === 'Partial') {
-        let actionItem = '';
-        let strategy = '';
-        let technicalContext = '';
-        
-        if (q.domain === 'IDENTITY & ACCESS') {
-          technicalContext = 'Unenforced or weak authentication methods leave administrative panels vulnerable to credential stuffing, brute-force algorithms, and session hijacking vectors.';
-          actionItem = 'Enforce Hardware/App-Based MFA immediately across all cloud dashboards, corporate email profiles, and SSH production entry points.';
-          strategy = 'Deploy a centralized Identity Provider (IDP) such as Okta or Microsoft Entra ID. Configure Conditional Access Policies that completely block authentication attempts unless validated by a biometric FIDO2 key or a TOTP authenticator token hook.';
-        } else if (q.domain === 'NETWORK SECURITY' && q.question_text.includes('Firewall')) {
-          technicalContext = 'Directly exposing origin server IP addresses allows malicious actors to bypass standard network security controls, opening the door to massive Layer 7 HTTP flood attacks, SQL injections, and Cross-Site Scripting (XSS).';
-          actionItem = 'Deploy an Enterprise Cloud-Native Web Application Firewall (WAF) to front-face all public service records.';
-          strategy = 'Route your root public domains through a proxy network like Cloudflare Enterprise or AWS WAF. Configure rigid edge rules to analyze incoming HTTP packet structures, drop malicious payloads before they hit your compute instances, and obscure your real infrastructure IPs.';
-        } else if (q.domain === 'NETWORK SECURITY') {
-          technicalContext = 'A flat network topology means that if a single office workstation is compromised by malware, the attacker can freely move laterally across the internal network to access your live production databases.';
-          actionItem = 'Isolate core relational databases and production compute clusters into private network subnets.';
-          strategy = 'Re-architect your cloud environment using VPC (Virtual Private Cloud) structural isolation. Implement strict Virtual Firewalls / Security Groups that block all inbound connectivity to production servers except for specific, white-listed application gateway nodes using micro-segmentation principles.';
-        } else if (q.domain === 'INCIDENT RESPONSE' && q.question_text.includes('Plan')) {
-          technicalContext = 'Without a formalized containment strategy, organizations experience massive delays during a security breach, resulting in higher data loss, severe operational downtime, and legal compliance penalties.';
-          actionItem = 'Draft an executive Incident Response Plan (IRP) and establish an operational chain-of-command matrix.';
-          strategy = 'Document explicit playbooks for distinct attack vectors (e.g., Ransomware, Data Breach). Assign strict personnel roles (Commander, Comms Lead, Legal Council) and schedule a bi-annual tabletop simulation exercise to pressure-test your disaster recovery recovery time objectives (RTO).';
-        } else if (q.domain === 'INCIDENT RESPONSE') {
-          technicalContext = 'Silent failures and unmonitored server access logs mean an adversary could live inside your corporate environment for months undetected, slowly exfiltrating sensitive business records.';
-          actionItem = 'Establish real-time audit trail and system log ingestion into a centralized, managed SIEM platform.';
-          strategy = 'Install telemetry agents (e.g., Datadog, AWS CloudTrail, Splunk) across all cloud provider backplanes, application servers, and gateway routers. Configure continuous correlation rules and anomaly detection alerts to flag unexpected root access modifications instantly via webhooks.';
-        } else {
-          technicalContext = 'Non-alignment with established cybersecurity framework parameters increases the attack surface and exposes the organization to systemic control oversights.';
-          actionItem = 'Conduct an immediate gap analysis review against standard control frameworks to mitigate this specific infrastructure vulnerability.';
-          strategy = 'Review configuration matrices, update structural system architecture schematics, and ensure operational logs align directly with essential security baseline criteria.';
-        }
-
+        const vault = q.remediation_vault || {};
         adviceList.push({
           id: q.id,
           domain: q.domain,
           control: q.question_text,
           severity: q.risk_weight >= 4 ? 'CRITICAL HIGH' : 'MEDIUM RISK',
-          technicalContext,
-          actionItem,
-          strategy,
+          technicalContext: vault.technical_context || 'Non-alignment with framework criteria.',
+          actionItem: vault.action_item || 'Conduct an immediate control check gap review.',
+          strategy: vault.strategy_blueprint || 'Review architecture metrics configuration.',
           status: answer
         });
       }
     });
-
     return adviceList;
   };
 
-  const handleSubmitAudit = async (e) => {
-    e.preventDefault();
-
-    const unanswered = questions.some(q => !answers[q.id]);
-    if (unanswered) return alert('Please answer all assessment questions.');
-
+  const handleSubmitAuditToDatabase = async () => {
     setIsSubmitting(true);
     try {
-      const { data: compData, error: compErr } = await supabase
+      const { data: compProfile, error: compErr } = await supabase
         .from('companies')
-        .insert([{ 
-          name: companyName, 
-          industry: companyIndustry, 
-          size: 'Enterprise',
-          user_id: user.id 
-        }])
-        .select()
-        .single();
+        .insert([{ name: companyName, industry: companyIndustry, size: 'Enterprise', user_id: user.id }])
+        .select().single();
 
       if (compErr) throw compErr;
 
-      const responseRows = questions.map(q => ({
-        company_id: compData.id,
+      const transactions = allQuestions.map(q => ({
+        company_id: compProfile.id,
         question_id: q.id,
-        answer: answers[q.id]
+        answer: answers[q.id] || 'No'
       }));
 
-      const { error: responseErr } = await supabase
-        .from('audit_responses')
-        .insert(responseRows);
+      const { error: insertErr } = await supabase.from('audit_responses').insert(transactions);
+      if (insertErr) throw insertErr;
 
-      if (responseErr) throw responseErr;
       setSubmitSuccess(true);
     } catch (err) {
-      alert(`Submission Fault: ${err.message}`);
+      alert(`Database Vault Failure: ${err.message}`);
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const currentScore = calculateScore();
+  const currentScore = calculateDynamicScore();
   const remediationItems = generateRemediationAdvice();
 
+  // --- TAILWIND SKELETON LOADERS INTERCEPT ---
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-950 text-white flex items-center justify-center">
-        <div className="text-center font-mono text-sm tracking-widest text-gray-500 animate-pulse">
-          DECRYPTING SECURITY SESSION...
+      <main className="min-h-[calc(100vh-80px)] bg-gray-950 text-white p-6 md:p-12">
+        <div className="max-w-7xl mx-auto space-y-8">
+          {!workspaceInitialized ? (
+            <div className="bg-gray-900 border border-gray-800 p-8 rounded-xl space-y-6 max-w-xl mx-auto mt-12 animate-pulse">
+              <div className="space-y-3 flex flex-col items-center">
+                <div className="h-4 bg-gray-800 rounded w-1/4"></div>
+                <div className="h-6 bg-gray-800 rounded w-2/3 mt-1"></div>
+                <div className="h-3 bg-gray-800 rounded w-5/6 mt-2"></div>
+              </div>
+              <div className="space-y-4 pt-2">
+                <div className="space-y-2">
+                  <div className="h-3 bg-gray-800 rounded w-1/3"></div>
+                  <div className="h-11 bg-gray-950 border border-gray-850 rounded-lg w-full"></div>
+                </div>
+                <div className="space-y-2">
+                  <div className="h-3 bg-gray-800 rounded w-1/4"></div>
+                  <div className="h-11 bg-gray-950 border border-gray-850 rounded-lg w-full"></div>
+                </div>
+              </div>
+              <div className="h-11 bg-gray-800 rounded-xl w-full mt-2"></div>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-pulse">
+              <div className="lg:col-span-2 space-y-6">
+                <div className="space-y-2">
+                  <div className="h-8 bg-gray-800 rounded w-1/3"></div>
+                  <div className="h-4 bg-gray-800 rounded w-1/4"></div>
+                </div>
+                <div className="space-y-4">
+                  {[1, 2, 3].map((i) => (
+                    <div key={i} className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4">
+                      <div className="flex justify-between items-center">
+                        <div className="h-6 bg-gray-800 rounded w-24"></div>
+                        <div className="h-4 bg-gray-800 rounded w-16"></div>
+                      </div>
+                      <div className="space-y-2">
+                        <div className="h-4 bg-gray-800 rounded w-full"></div>
+                        <div className="h-4 bg-gray-800 rounded w-5/6"></div>
+                      </div>
+                      <div className="grid grid-cols-3 gap-3 pt-2">
+                        <div className="h-9 bg-gray-950 rounded-lg"></div>
+                        <div className="h-9 bg-gray-950 rounded-lg"></div>
+                        <div className="h-9 bg-gray-950 rounded-lg"></div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="lg:col-span-1 space-y-6">
+                <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 flex flex-col items-center space-y-4">
+                  <div className="h-5 bg-gray-800 rounded w-1/2"></div>
+                  <div className="w-36 h-36 rounded-full bg-gray-950 border-4 border-gray-800 flex items-center justify-center">
+                    <div className="w-20 h-8 bg-gray-900 rounded"></div>
+                  </div>
+                </div>
+                <div className="bg-gray-900/40 border border-gray-850 border-dashed rounded-xl p-8 h-48 flex flex-col items-center justify-center space-y-3">
+                  <div className="w-6 h-6 rounded-full bg-gray-800"></div>
+                  <div className="h-3 bg-gray-800 rounded w-3/4"></div>
+                  <div className="h-3 bg-gray-800 rounded w-1/2"></div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
-      </div>
+      </main>
     );
   }
 
+  // --- FIXED: RENDER HIGH-FIDELITY MARKETING DECK FOR UNAUTHENTICATED GUESTS ---
   if (!user) {
     return (
       <main className="min-h-[calc(100vh-80px)] bg-gray-950 text-white relative overflow-hidden">
@@ -289,193 +381,212 @@ export default function Home() {
     );
   }
 
+  // --- REGULAR AUTHENTICATED SYSTEM FLOW ---
   return (
     <main className="min-h-[calc(100vh-80px)] bg-gray-950 text-white p-6 md:p-12">
-      <div className="max-w-7xl mx-auto">
-        
+      <div className="max-w-7xl mx-auto space-y-8">
+
         {!workspaceInitialized ? (
-          <div className="bg-gray-900 border border-gray-800 p-8 rounded-xl space-y-6 shadow-md max-w-xl mx-auto mt-12">
-            <div className="text-center">
-              <span className="text-blue-500 font-mono text-xs uppercase tracking-widest flex items-center justify-center gap-1.5">
-                <Building2 className="w-3.5 h-3.5" /> System Initialization
+          /* WORKSPACE DISCOVERY INITIALIZATION MODAL */
+          <div className="bg-gray-900 border border-gray-800 p-8 rounded-2xl max-w-xl mx-auto space-y-6 shadow-xl mt-12">
+            <div className="text-center space-y-1">
+              <span className="text-blue-500 font-mono text-[10px] uppercase tracking-widest flex items-center justify-center gap-1">
+                <Layers className="w-3.5 h-3.5" /> Initialize Operational Profile
               </span>
-              <h2 className="text-xl font-bold mt-1 text-white">Register Workspace Profile</h2>
-              <p className="text-xs text-gray-400 mt-2">
-                Before launching your security posture metrics diagnostics, please bind your direct organization metadata.
-              </p>
+              <h2 className="text-lg font-bold">Register Company Metadata</h2>
             </div>
-
             <div className="space-y-4">
-              <div className="space-y-1">
-                <label className="block text-xs font-bold uppercase tracking-wider text-gray-400">Legal Business Name</label>
-                <input 
-                  type="text" required value={companyName} onChange={(e) => setCompanyName(e.target.value)}
-                  className="w-full bg-gray-950 border border-gray-800 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-blue-500 text-sm"
-                  placeholder="e.g., Acme Innovations Ltd"
-                />
-              </div>
-
-              <div className="space-y-1">
-                <label className="block text-xs font-bold uppercase tracking-wider text-gray-400">Industry Vertical</label>
-                <select 
-                  value={companyIndustry} onChange={(e) => setCompanyIndustry(e.target.value)}
-                  className="w-full bg-gray-950 border border-gray-800 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-blue-500 text-sm"
-                >
-                  <option value="Technology">Technology & Cloud SaaS</option>
-                  <option value="Finance">Fintech & Banking Operations</option>
-                  <option value="Healthcare">Healthcare & Biotech Systems</option>
-                  <option value="E-commerce">Retail & E-commerce Logistics</option>
-                </select>
-              </div>
+              <input 
+                type="text" value={companyName} onChange={e => setCompanyName(e.target.value)}
+                className="w-full bg-gray-950 border border-gray-800 rounded-xl px-4 py-3 text-sm focus:border-blue-500 focus:outline-none text-white"
+                placeholder="Organization Legal Title"
+              />
+              <select 
+                value={companyIndustry} onChange={e => setCompanyIndustry(e.target.value)}
+                className="w-full bg-gray-950 border border-gray-800 rounded-xl px-4 py-3 text-sm focus:border-blue-500 focus:outline-none text-white"
+              >
+                <option value="Technology">Technology Frameworks</option>
+                <option value="Finance">Fintech Operational Matrix</option>
+              </select>
+              <button 
+                onClick={() => { if(companyName.trim()) setWorkspaceInitialized(true); }}
+                className="w-full py-3 bg-blue-600 hover:bg-blue-500 rounded-xl font-bold uppercase text-xs tracking-wider transition shadow-lg"
+              >
+                Launch Assessment Engine
+              </button>
             </div>
-
-            <button 
-              type="button"
-              onClick={() => {
-                if (!companyName.trim()) return alert('Please input a valid organization profile title.');
-                setWorkspaceInitialized(true);
-              }}
-              className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs tracking-wider uppercase shadow-lg transition"
-            >
-              Initialize Secure Workspace
-            </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          /* ACTIVE EXPLOIT ASSESSMENT WORKSPACE */
+          <div className="space-y-8 animate-fade-in">
             
-            <div className="lg:col-span-2 space-y-6">
-              <div className="flex flex-col space-y-1">
-                <h1 className="text-3xl font-extrabold tracking-tight">Cyber Risk Evaluation</h1>
-                <p className="text-xs text-gray-400 font-mono uppercase tracking-wider">
-                  Target Company: <span className="text-blue-400 font-bold">{companyName}</span> ({companyIndustry})
-                </p>
-              </div>
-
-              {submitSuccess ? (
-                <div className="bg-green-950/30 border border-green-500/40 p-8 rounded-2xl text-center space-y-4">
-                  <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-green-900/50 text-green-400 mb-2">
-                    <CheckCircle2 className="w-6 h-6 stroke-[2.5]" />
-                  </div>
-                  <h2 className="text-2xl font-bold text-green-400">Assessment Vaulted Securely</h2>
-                  <p className="text-gray-400 text-sm max-w-md mx-auto">
-                    The posture profile data vectors for <span className="text-white font-semibold">{companyName}</span> have been fully processed and written to the immutable relational logging database.
-                  </p>
-                  <button 
-                    onClick={() => { 
-                      setSubmitSuccess(false); 
-                      setWorkspaceInitialized(false); 
-                      setCompanyName(''); 
-                      setAnswers({}); 
-                    }} 
-                    className="mt-4 px-6 py-2 bg-gray-900 border border-gray-700 rounded-lg text-sm text-white hover:bg-gray-800 transition"
-                  >
-                    Conduct New Audit Session
-                  </button>
-                </div>
-              ) : (
-                <form onSubmit={handleSubmitAudit} className="space-y-6">
-                  <div className="space-y-4">
-                    {questions.map((q, idx) => (
-                      <div key={q.id} className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4 shadow-md">
-                        <div className="flex justify-between items-center">
-                          <span className="text-xs px-2 py-1 bg-blue-950 text-blue-400 rounded font-bold border border-blue-900/50">{q.domain}</span>
-                          <span className="text-xs font-mono text-gray-500">Control #{idx + 1}</span>
-                        </div>
-                        <p className="text-gray-200 text-sm font-medium leading-relaxed">{q.question_text}</p>
-                        <div className="grid grid-cols-3 gap-3">
-                          {['Yes', 'Partial', 'No'].map((option) => {
-                            const isSelected = answers[q.id] === option;
-                            return (
-                              <button
-                                key={option} type="button" onClick={() => handleSelectAnswer(q.id, option)}
-                                className={`py-2 px-3 text-sm font-semibold rounded-lg border transition ${
-                                  isSelected 
-                                    ? option === 'Yes' ? 'bg-green-950/40 border-green-500 text-green-400' :
-                                      option === 'Partial' ? 'bg-yellow-950/40 border-yellow-500 text-yellow-300' : 'bg-red-950/40 border-red-500 text-red-400'
-                                    : 'bg-gray-950 border-gray-800 text-gray-400 hover:bg-gray-800/40'
-                                }`}
-                              >
-                                {option}
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  <button type="submit" disabled={isSubmitting} className="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-sm tracking-wider uppercase shadow-lg transition">
-                    {isSubmitting ? 'Securing Submissions...' : 'Vault & Finalize Audit'}
-                  </button>
-                </form>
-              )}
+            {/* TABS WRAPPER */}
+            <div className="flex gap-4 border-b border-gray-900 pb-4 overflow-x-auto">
+              {domainSequence.map(domainOpt => (
+                <button
+                  key={domainOpt}
+                  onClick={() => {
+                    setCurrentDomain(domainOpt);
+                    setCurrentIndex(0);
+                    setInConditionalBranch(false);
+                  }}
+                  className={`px-4 py-2 rounded-xl text-xs font-mono font-bold uppercase transition shrink-0 ${
+                    currentDomain === domainOpt 
+                      ? 'bg-blue-600 border border-blue-500 text-white shadow-md' 
+                      : 'bg-gray-900 border border-gray-800 text-gray-400 hover:text-white'
+                  }`}
+                >
+                  {domainOpt.split(' ')[0]} Engine
+                </button>
+              ))}
             </div>
 
-            <div className="lg:col-span-1 space-y-6">
-              {submitSuccess ? (
-                <>
-                  <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 text-center space-y-6 shadow-xl animate-fade-in">
-                    <h2 className="text-lg font-bold text-white">Generated Security Rating</h2>
-                    <div className="py-4 flex items-center justify-center">
-                      <div className="w-36 h-36 rounded-full border-4 border-gray-800 flex flex-col items-center justify-center bg-gray-950">
-                        <span className={`text-4xl font-black ${currentScore === null ? 'text-gray-600' : currentScore >= 80 ? 'text-green-400' : currentScore >= 50 ? 'text-yellow-400' : 'text-red-500'}`}>
-                          {currentScore !== null ? `${currentScore}%` : '--'}
-                        </span>
-                        <span className="text-[9px] uppercase font-bold text-gray-500 tracking-widest mt-1">Score Index</span>
-                      </div>
-                    </div>
+            {/* DUAL PANEL LAYOUT FRAMEWORK */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              
+              <div className="lg:col-span-2 space-y-6">
+                {submitSuccess ? (
+                  <div className="bg-gray-900 border border-green-900/40 p-12 rounded-2xl text-center space-y-4 shadow-xl">
+                    <CheckCircle2 className="w-12 h-12 text-green-400 mx-auto" />
+                    <h2 className="text-xl font-bold">Audit Securely Vaulted</h2>
+                    <p className="text-xs text-gray-400 max-w-sm mx-auto">Relational transaction blocks successfully compiled and written to database records.</p>
                   </div>
-
-                  <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4 shadow-xl animate-fade-in">
-                    <div>
-                      <h3 className="text-base font-bold text-white tracking-tight">Active Mitigation Advisory</h3>
-                      <p className="text-[10px] text-gray-500 font-mono uppercase mt-0.5">Automated Threat Mitigation Blueprint</p>
+                ) : (
+                  <div className="bg-gray-900 border border-gray-800 rounded-2xl p-8 space-y-6 shadow-xl relative overflow-hidden">
+                    
+                    <div className="flex justify-between items-center text-xs font-mono text-gray-500">
+                      <span className="uppercase tracking-widest text-[10px] text-blue-400">{currentDomain} Matrix</span>
+                      <span>Step {currentIndex + 1} of {filteredQuestions.length || 1}</span>
                     </div>
 
-                    <div className="space-y-4 max-h-[500px] overflow-y-auto pr-1">
-                      {remediationItems.length === 0 ? (
-                        <div className="p-4 bg-green-950/20 border border-green-800/30 text-green-400 rounded-lg text-xs font-medium text-center flex items-center justify-center gap-2">
-                          <CheckCircle2 className="w-4 h-4 text-green-400" /> Ideal Alignment: All control profiles meet absolute framework expectations. No vulnerability advisories generated.
+                    <div className="min-h-[160px] flex flex-col justify-center">
+                      {filteredQuestions.length === 0 ? (
+                        <p className="text-xs text-gray-500 font-mono italic text-center py-6">Loading framework parameters for this domain...</p>
+                      ) : !inConditionalBranch ? (
+                        <div className="space-y-3">
+                          <h2 className="text-lg font-bold text-gray-100 leading-relaxed flex items-start gap-2.5">
+                            <HelpCircle className="w-5 h-5 text-blue-500 shrink-0 mt-0.5" />
+                            {activeQuestion?.question_text}
+                          </h2>
                         </div>
                       ) : (
-                        remediationItems.map((item) => (
-                          <div key={item.id} className="p-5 bg-gray-950 border border-gray-850 rounded-xl space-y-3 shadow-md">
-                            <div className="flex justify-between items-center">
-                              <span className="text-[9px] font-bold px-2 py-0.5 bg-gray-900 border border-gray-800 rounded text-blue-400 uppercase font-mono">
-                                {item.domain}
-                              </span>
-                              <span className={`text-[9px] font-black tracking-wide uppercase px-2 py-0.5 rounded ${
-                                item.severity.includes('CRITICAL') ? 'bg-red-950/60 text-red-400 border border-red-900/40' : 'bg-amber-950/60 text-amber-400 border border-amber-900/40'
-                              }`}>
-                                {item.severity}
-                              </span>
-                            </div>
-                            
-                            <div className="space-y-0.5">
-                              <p className="text-[10px] font-bold text-gray-500 font-mono uppercase">Vulnerability Context:</p>
-                              <p className="text-xs text-gray-400 leading-relaxed italic">"{item.technicalContext}"</p>
-                            </div>
-
-                            <div className="pt-2 border-t border-gray-900 space-y-0.5">
-                              <p className="text-[10px] font-bold text-red-400 font-mono uppercase">Required Action:</p>
-                              <p className="text-xs text-gray-200 font-medium leading-relaxed">{item.actionItem}</p>
-                            </div>
-
-                            <div className="pt-2 border-t border-gray-900 space-y-0.5">
-                              <p className="text-[10px] font-bold text-blue-400 font-mono uppercase">Implementation Blueprint Strategy:</p>
-                              <p className="text-[11px] text-gray-400 leading-relaxed font-medium">{item.strategy}</p>
-                            </div>
+                        <div className="space-y-4 p-5 bg-gray-950 border border-amber-900/30 rounded-xl animate-fade-in">
+                          <div className="flex items-center gap-1.5 text-xs text-amber-400 font-mono font-bold">
+                            <BookOpen className="w-4 h-4" /> KNOWLEDGE DETOUR CONTEXT
                           </div>
-                        ))
+                          <p className="text-xs text-gray-400 leading-relaxed italic font-mono">
+                            {activeQuestion?.remediation_vault?.technical_context}
+                          </p>
+                          <h3 className="text-sm font-semibold text-gray-200 leading-relaxed pt-3 border-t border-gray-900">
+                            🎯 Recommended Action: {activeQuestion?.remediation_vault?.action_item}
+                          </h3>
+                        </div>
                       )}
                     </div>
+
+                    <div className="grid grid-cols-3 gap-3">
+                      {['Yes', 'Partial', 'No'].map(opt => (
+                        <button
+                          key={opt} onClick={() => handleProcessAnswer(opt)}
+                          disabled={filteredQuestions.length === 0}
+                          className="py-3 bg-gray-950 border border-gray-850 hover:border-gray-700 rounded-xl text-xs font-mono font-bold uppercase transition hover:bg-gray-850 disabled:opacity-20 text-gray-300 hover:text-white"
+                        >
+                          {opt}
+                        </button>
+                      ))}
+                    </div>
+
+                    <div className="flex justify-between items-center pt-4 border-t border-gray-950 text-xs font-mono text-gray-500">
+                      <button 
+                        disabled={currentIndex === 0 && !inConditionalBranch}
+                        onClick={() => {
+                          if (inConditionalBranch) setInConditionalBranch(false);
+                          else setCurrentIndex(prev => Math.max(0, prev - 1));
+                        }}
+                        className="flex items-center gap-1 hover:text-white transition disabled:opacity-10"
+                      >
+                        <ArrowLeft className="w-3.5 h-3.5" /> Back
+                      </button>
+                      
+                      {currentIndex === filteredQuestions.length - 1 && !inConditionalBranch && filteredQuestions.length > 0 && (
+                        <button 
+                          onClick={handleSubmitAuditToDatabase} disabled={isSubmitting}
+                          className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-lg text-[10px] uppercase tracking-wider shadow-md flex items-center gap-1.5"
+                        >
+                          Vault Audit Matrix <ArrowRight className="w-3 h-3" />
+                        </button>
+                      )}
+                    </div>
+
                   </div>
-                </>
-              ) : (
-                <div className="bg-gray-900/40 border border-gray-850 border-dashed rounded-xl p-8 text-center text-gray-500 text-xs font-mono py-20 flex flex-col items-center justify-center gap-3">
-                  <Lock className="w-6 h-6 text-gray-600 stroke-[1.5]" />
-                  <span>Posture analysis metrics locked. Complete the framework controls evaluation and vault the results to compile your mitigation advisory assets.</span>
-                </div>
-              )}
+                )}
+              </div>
+
+              <div className="lg:col-span-1 space-y-6">
+                {submitSuccess ? (
+                  <>
+                    <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 text-center space-y-6 shadow-xl animate-fade-in">
+                      <h2 className="text-sm font-bold text-white uppercase tracking-wider font-mono text-gray-400">Security Rating Matrix</h2>
+                      <div className="py-4 flex items-center justify-center">
+                        <div className="w-36 h-36 rounded-full border-4 border-gray-800 flex flex-col items-center justify-center bg-gray-950 shadow-inner">
+                          <span className={`text-4xl font-black ${currentScore === null ? 'text-gray-600' : currentScore >= 80 ? 'text-green-400' : currentScore >= 50 ? 'text-yellow-400' : 'text-red-500'}`}>
+                            {currentScore !== null ? `${currentScore}%` : '--'}
+                          </span>
+                          <span className="text-[9px] uppercase font-bold text-gray-500 tracking-widest mt-1">Score Index</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-gray-900 border border-gray-800 rounded-xl p-6 space-y-4 shadow-xl animate-fade-in">
+                      <div>
+                        <h3 className="text-base font-bold text-white tracking-tight">Active Mitigation Advisory</h3>
+                        <p className="text-[10px] text-gray-500 font-mono uppercase mt-0.5">Automated Threat Mitigation Blueprint</p>
+                      </div>
+
+                      <div className="space-y-4 max-h-[400px] overflow-y-auto pr-1">
+                        {remediationItems.length === 0 ? (
+                          <div className="p-4 bg-green-950/20 border border-green-800/30 text-green-400 rounded-lg text-xs font-medium text-center flex items-center justify-center gap-2">
+                            <CheckCircle2 className="w-4 h-4 text-green-400" /> Ideal Alignment: All control profiles meet absolute framework expectations.
+                          </div>
+                        ) : (
+                          remediationItems.map((item) => (
+                            <div key={item.id} className="p-5 bg-gray-950 border border-gray-850 rounded-xl space-y-3 shadow-md">
+                              <div className="flex justify-between items-center">
+                                <span className="text-[9px] font-bold px-2 py-0.5 bg-gray-900 border border-gray-800 rounded text-blue-400 uppercase font-mono">
+                                  {item.domain}
+                                </span>
+                                <span className={`text-[9px] font-black tracking-wide uppercase px-2 py-0.5 rounded ${
+                                  item.severity.includes('CRITICAL') ? 'bg-red-950/60 text-red-400 border border-red-900/40' : 'bg-amber-950/60 text-amber-400 border border-amber-900/40'
+                                }`}>
+                                  {item.severity}
+                                </span>
+                              </div>
+                              <div className="space-y-0.5">
+                                <p className="text-[10px] font-bold text-gray-500 font-mono uppercase">Vulnerability Context:</p>
+                                <p className="text-xs text-gray-400 leading-relaxed italic">"{item.technicalContext}"</p>
+                              </div>
+                              <div className="pt-2 border-t border-gray-900 space-y-0.5">
+                                <p className="text-[10px] font-bold text-red-400 font-mono uppercase">Required Action:</p>
+                                <p className="text-xs text-gray-200 font-medium leading-relaxed">{item.actionItem}</p>
+                              </div>
+                              <div className="pt-2 border-t border-gray-900 space-y-0.5">
+                                <p className="text-[10px] font-bold text-blue-400 font-mono uppercase">Implementation Blueprint Strategy:</p>
+                                <p className="text-[11px] text-gray-400 leading-relaxed font-medium">{item.strategy}</p>
+                              </div>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <div className="bg-gray-900/40 border border-gray-850 border-dashed rounded-2xl p-8 text-center text-xs font-mono py-24 text-gray-500 flex flex-col items-center justify-center gap-3 shadow-sm h-full">
+                    <Lock className="w-6 h-6 text-gray-600 stroke-[1.5]" />
+                    <span>Posture analysis metrics locked. Complete the framework controls evaluation and vault the results to compile your mitigation advisory assets.</span>
+                  </div>
+                )}
+              </div>
+
             </div>
 
           </div>
