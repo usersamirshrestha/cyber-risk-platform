@@ -21,7 +21,7 @@ export default function RootLayout({ children }) {
       }
 
       try {
-        // FIXED: Added .mfa sub-namespace to invoke the assurance level reader correctly
+        // FIXED: Invoking the correct nested .mfa endpoint method here
         const { data, error } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
         
         if (error) throw error;
