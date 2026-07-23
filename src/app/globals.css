@@ -25,3 +25,25 @@ body {
     text-wrap: balance;
   }
 }
+/* Print styles for PDF Export feature */
+@media print {
+  /* Hide navigation bars, footers, and background grids during print */
+  nav, 
+  button.print\:hidden,
+  .print\:hidden {
+    display: none !important;
+  }
+
+  /* Reset dark backgrounds to crisp white paper layout */
+  body, main {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Ensure page breaks don't split cards mid-sentence */
+  .print\:break-inside-avoid {
+    break-inside: avoid !important;
+  }
+}

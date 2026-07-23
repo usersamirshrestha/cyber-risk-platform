@@ -6,6 +6,7 @@ import MFASetup from './components/MFASetup';
 import './globals.css'; 
 import { Lock, Shield, LogOut } from 'lucide-react';
 
+
 export default function RootLayout({ children }) {
   const [session, setSession] = useState(null);
   const [showMFAModal, setShowMFAModal] = useState(false);
@@ -21,7 +22,7 @@ export default function RootLayout({ children }) {
       }
 
       try {
-        // FIXED: Invoking the correct nested .mfa endpoint method here
+        // Invoking the correct nested .mfa endpoint method here
         const { data, error } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
         
         if (error) throw error;
@@ -59,7 +60,7 @@ export default function RootLayout({ children }) {
 
   return (
     <html lang="en">
-      <body className="bg-gray-950 text-white antialiased">
+      <body className="bg-gray-950 text-white antialiased flex flex-col min-h-screen">
         
         {/* Global Navigation Header */}
         <nav className="w-full bg-gray-900/40 backdrop-blur-md border-b border-gray-850/80 sticky top-0 z-50 px-6 py-4">
@@ -98,7 +99,7 @@ export default function RootLayout({ children }) {
                 </button>
               </div>
             ) : session ? (
-              /* If the account is logged in but stuck at the MFA input page, show a restricted disconnect gate */
+              /* Restricted disconnect gate when MFA is pending */
               <div className="flex items-center gap-4">
                 <span className="text-xs text-amber-400 font-mono flex items-center gap-1.5 animate-pulse">
                   ⚠️ Verification Required
@@ -143,7 +144,41 @@ export default function RootLayout({ children }) {
           </div>
         )}
 
-        {children}
+        {/* Main Content Body */}
+        <div className="flex-1">
+          {children}
+        </div>
+
+        {/* ENTERPRISE FOOTER BLOCK */}
+<footer className="border-t border-gray-900 bg-gray-950 text-gray-500 text-xs font-mono py-8 px-6 print:hidden mt-auto">
+  <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+    
+    {/* Left Side: Brand & Standard */}
+    <div className="flex items-center gap-2">
+      <Shield className="w-4 h-4 text-blue-400" />
+      <span className="text-gray-300 font-bold tracking-tight text-sm">CyberRiskPlatform</span>
+      <span className="text-gray-700">|</span>
+      <span>NIST CSF v1.1 Compliant</span>
+    </div>
+
+    {/* Center: Live Status Indicators */}
+    <div className="flex items-center gap-4 text-[11px]">
+      <span className="flex items-center gap-1.5 text-gray-400">
+        <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+        System Online
+      </span>
+      <span className="text-gray-800">•</span>
+      <span>256-bit Encryption</span>
+    </div>
+
+    {/* Right Side: Copyright */}
+    <div>
+      © {new Date().getFullYear()} CyberRiskPlatform. All rights reserved.
+    </div>
+
+  </div>
+</footer>
+
       </body>
     </html>
   );
